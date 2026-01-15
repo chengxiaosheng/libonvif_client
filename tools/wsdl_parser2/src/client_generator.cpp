@@ -1,0 +1,524 @@
+﻿/**
+ * @file client_generator.cpp
+ * @brief 服务客户端代码生成器实现
+ */
+
+#include "../include/client_generator.h"
+#include <fstream>
+#include <sstream>
+#include <filesystem>
+#include <algorithm>
+#include <regex>
+#include <iostream>
+
+namespace wsdl_parser2 {
+
+ClientGenerator::ClientGenerator(const ParserConfig& config)
+    : config_(config), type_generator_(config, GeneratorOptions{}) {
+}
+
+bool ClientGenerator::generate_service_client(
+    const WsdlService& service,
+    const std::string& header_file,
+    const std::string& source_file) const {
+
+    try {
+        // 生成纯头文件（实现内联）
+        std::string header_code = generate_client_header(service);
+        std::ofstream header_out(header_file);
+        if (!header_out.is_open()) {
+            std::cerr << "Unable to create header file: " << header_file << std::endl;
+            return false;
+        }
+        header_out << header_code;
+        header_out.close();
+
+        // 不再生成 .cpp 源文件
+        return true;
+
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to generate client code: " << e.what() << std::endl;
+        return false;
+    }
+}
+
+int ClientGenerator::generate_all_clients(
+    const std::vector<std::shared_ptr<FileInfo>>& files) const {
+
+    int generated_count = 0;
+
+    // 按命名空间分组服务：同一命名空间的所有services合并到一个客户端类中
+    std::map<std::string, std::vector<WsdlService>> services_by_namespace;
+
+    for (const auto& file_info : files) {
+        for (const auto& service : file_info->services) {
+            if (service.operations.empty()) {
+                continue; // Skip services without operations
+            }
+
+            // 使用target_namespace作为分组键
+            std::string ns_key = service.target_namespace;
+            if (ns_key.empty()) {
+                ns_key = "default";
+            }
+
+            services_by_namespace[ns_key].push_back(service);
+        }
+    }
+
+    // 为每个命名空间生成一个合并的客户端类
+    for (const auto& [namespace_uri, services] : services_by_namespace) {
+        if (services.empty()) {
+            continue;
+        }
+
+        // 合并所有服务到一个
+        WsdlService merged_service = services[0];  // 使用第一个服务作为基础
+
+        // 为第一个服务的操作设置命名空间信息
+        for (auto& op : merged_service.operations) {
+            if (op.source_namespace.empty()) {
+                op.source_namespace = merged_service.target_namespace;
+                op.source_ns_prefix = merged_service.namespace_prefix;
+            }
+        }
+
+        // 合并所有操作，并保留每个操作的命名空间信息（避免重复）
+        for (size_t i = 1; i < services.size(); ++i) {
+            for (auto op : services[i].operations) {
+                // 检查是否重复
+                bool duplicate = false;
+                for (const auto& existing_op : merged_service.operations) {
+                    if (existing_op.name == op.name) {
+                        duplicate = true;
+                        if (config().verbose) {
+                            std::cerr << "警告: 跳过重复操作 " << op.name
+                                     << " (来自 " << services[i].name << ")" << std::endl;
+                        }
+                        break;
+                    }
+                }
+
+                if (!duplicate) {
+                    // 为操作设置源命名空间信息
+                    if (op.source_namespace.empty()) {
+                        op.source_namespace = services[i].target_namespace;
+                        op.source_ns_prefix = services[i].namespace_prefix;
+                    }
+                    merged_service.operations.push_back(op);
+                }
+            }
+
+            // 合并命名空间映射
+            for (const auto& [prefix, uri] : services[i].namespaces) {
+                merged_service.namespaces[prefix] = uri;
+            }
+        }
+
+        std::string class_name = get_client_class_name(merged_service);
+        std::string header_file = (std::filesystem::path(config().output_client_header_dir)/(class_name + ".h")).string();
+        std::string source_file = (std::filesystem::path(config().output_client_source_dir)/(class_name + ".cpp")).string();
+
+        if (generate_service_client(merged_service, header_file, source_file)) {
+            std::cout << "Generated client: " << class_name
+                     << " (" << merged_service.operations.size() << " operations";
+            if (services.size() > 1) {
+                std::cout << " from " << services.size() << " portTypes";
+            }
+            std::cout << ")" << std::endl;
+            generated_count++;
+        }
+    }
+
+    return generated_count;
+}
+
+std::string ClientGenerator::generate_client_header(const WsdlService& service) const {
+    std::ostringstream oss;
+
+    std::string class_name = get_client_class_name(service);
+
+    // 文件头注释
+    oss << "/**\n";
+    oss << " * @file " << class_name << ".h\n";
+    oss << " * @brief " << service.name << " client (header-only)\n";
+    if (!service.documentation.empty()) {
+        oss << " * @note " << service.documentation << "\n";
+    }
+    oss << " * @note This file is auto-generated by wsdl_parser2, do not modify manually\n";
+    oss << " */\n\n";
+
+    oss << "#pragma once\n\n";
+
+    // 包含头文件
+    oss << "#include <libonvif_client/core/onvif_service_base.h>\n";
+    oss << "#include <libonvif_client/core/onvif_callback.h>\n";
+
+    // 包含相关的类型定义头文件
+    std::set<std::string> types_headers;
+
+    // 根据服务的目标命名空间直接查找schema配置
+    if (!service.target_namespace.empty()) {
+        for (const auto& schema_config : config_.schema_configs) {
+            if (schema_config.ns_url == service.target_namespace) {
+                types_headers.insert(schema_config.output_name + ".h");
+                break;
+            }
+        }
+    }
+
+    // 扫描操作中使用的类型，添加相关的头文件
+    for (const auto& operation : service.operations) {
+        // 分析输入和输出类型，查找需要包含的头文件
+        for (const auto& schema_config : config_.schema_configs) {
+            if (operation.input_type.find(schema_config.ns_prefix + ":") == 0 ||
+                operation.output_type.find(schema_config.ns_prefix + ":") == 0) {
+                types_headers.insert(schema_config.output_name + ".h");
+            }
+        }
+    }
+
+    // 包含所有找到的类型头文件
+    for (const auto& header : types_headers) {
+        oss << "#include " << generate_types_include_path(header) << "\n";
+    }
+    oss << "\n";
+
+    // 命名空间
+    oss << "namespace " << config().client_namespace << " {\n\n";
+
+    // 类定义
+    oss << "/**\n";
+    oss << " * @brief " << service.name << " client\n";
+    if (!service.target_namespace.empty()) {
+        oss << " * @namespace " << service.target_namespace << "\n";
+    }
+    if (!service.service_url.empty()) {
+        oss << " * @service_url " << service.service_url << "\n";
+    }
+    oss << " */\n";
+    oss << "class" << (config().export_directive.empty() ? "" : " " + config().export_directive) << " " << class_name << " : public OnvifServiceBase {\n";
+    oss << "public:\n";
+
+    // 构造函数（内联实现）
+    oss << "    /**\n";
+    oss << "     * @brief Constructor\n";
+    oss << "     * @param service_url ONVIF service endpoint URL\n";
+    oss << "     * @param http_client HTTP client implementation (user provided)\n";
+    oss << "     * @param username Authentication username (optional)\n";
+    oss << "     * @param password Authentication password (optional)\n";
+    oss << "     */\n";
+    oss << "    " << class_name << "(const std::string& service_url,\n";
+    oss << "                    const std::shared_ptr<IHttpClient>& http_client,\n";
+    oss << "                    const std::string& username = \"\",\n";
+    oss << "                    const std::string& password = \"\")\n";
+    oss << "        : OnvifServiceBase(service_url, http_client, username, password) {\n";
+    oss << "    }\n\n";
+
+    // 操作方法（内联实现）
+    for (const auto& operation : service.operations) {
+        oss << generate_operation_inline_implementation(service, operation);
+    }
+
+    oss << "    const char *get_namespace_prefix() const override {\n";
+    oss << "        return TARGET_NAMESPACE_PREFIX;\n";
+    oss << "    }\n\n";
+    oss << "    const char *get_namespace_uri() const override {\n";
+    oss << "        return TARGET_NAMESPACE;\n";
+    oss << "    }\n\n";
+
+    oss << "    static constexpr const char* TARGET_NAMESPACE = \"" << service.target_namespace << "\";\n";
+    oss << "    static constexpr const char* TARGET_NAMESPACE_PREFIX = \"" << extract_namespace_prefix(service) << "\";\n";
+    oss << "};\n\n";
+
+    oss << "} // namespace " << config().client_namespace << "\n";
+
+    return oss.str();
+}
+
+std::string ClientGenerator::generate_client_source(const WsdlService& service,
+                                                   const std::string& header_filename) const {
+    std::ostringstream oss;
+
+    std::string class_name = get_client_class_name(service);
+
+    // 文件头注释
+    oss << "/**\n";
+    oss << " * @file " << class_name << ".cpp\n";
+    oss << " * @brief " << service.name << " client implementation\n";
+    oss << " */\n\n";
+
+    oss << "#include " << generate_client_source_include_path(header_filename) << "\n";
+    oss << "#include <libonvif_client/core/service_client_factory.h>\n";
+    oss << "#include <sstream>\n\n";
+
+    oss << "namespace " << config().client_namespace << " {\n\n";
+
+    // 生成服务自动注册代码
+    oss << generate_service_registration(service, class_name);
+    oss << "\n";
+
+    // 构造函数实现
+    oss << class_name << "::" << class_name << "(const std::string& service_url,\n";
+    oss << "                                     const std::shared_ptr<IHttpClient> &http_client,\n";
+    oss << "                                     const std::string& username,\n";
+    oss << "                                     const std::string& password)\n";
+    oss << "    : OnvifServiceBase(service_url, http_client, username, password) {\n";
+    oss << "}\n\n";
+    
+    // 操作方法实现
+    for (const auto& operation : service.operations) {
+        oss << generate_operation_implementation(service, operation);
+    }
+    
+    oss << "} // namespace " << config().client_namespace << "\n";
+    
+    return oss.str();
+}
+
+std::string ClientGenerator::generate_operation_declaration(const WsdlOperation& operation) const {
+    std::ostringstream oss;
+    
+    std::string input_type = map_message_to_cpp_type(operation.input_type);
+    std::string output_type = map_message_to_cpp_type(operation.output_type);
+    
+    oss << "    /**\n";
+    oss << "     * @brief " << operation.name << " operation\n";
+    if (!operation.documentation.empty()) {
+        oss << "     * @note " << operation.documentation << "\n";
+    }
+    oss << "     * @param request Request parameters\n";
+    oss << "     * @param callback Result callback\n";
+    oss << "     */\n";
+    
+    if (!output_type.empty() && output_type != "void") {
+        oss << "    void " << operation.name << "(const " << input_type << "& request,\n";
+        oss << "                           const OnvifCallback<" << output_type << "> & callback);\n\n";
+    } else {
+        oss << "    void " << operation.name << "(const " << input_type << "& request,\n";
+        oss << "                           const OnvifSimpleCallback & callback);\n\n";
+    }
+    
+    return oss.str();
+}
+
+std::string ClientGenerator::generate_operation_implementation(
+    const WsdlService& service, 
+    const WsdlOperation& operation) const {
+    
+    std::ostringstream oss;
+    
+    std::string class_name = get_client_class_name(service);
+    std::string input_type = map_message_to_cpp_type(operation.input_type);
+    std::string output_type = map_message_to_cpp_type(operation.output_type);
+    
+    // 构造SOAP Action
+    std::string soap_action = operation.soap_action;
+    if (soap_action.empty()) {
+        soap_action = service.target_namespace + "/" + operation.name;
+    }
+    
+    // 判断是否需要使用 call_service_ex（当操作来自不同命名空间时）
+    bool use_service_ex = (!operation.source_namespace.empty() &&
+                           operation.source_namespace != service.target_namespace);
+
+    // 生成操作实现
+    oss << "void " << class_name << "::" << operation.name << "(const " << input_type << "& request,\n";
+    if (!output_type.empty() && output_type != "void") {
+        oss << "                                        const OnvifCallback<" << output_type << "> & callback) {\n";
+        if (use_service_ex) {
+            oss << "    call_service_ex<" << input_type << ", " << output_type << ">(\n";
+        } else {
+            oss << "    call_service<" << input_type << ", " << output_type << ">(\n";
+        }
+    } else {
+        oss << "                                        const OnvifSimpleCallback & callback) {\n";
+        oss << "    // 直接使用 void 特化的 call_service\n";
+        if (use_service_ex) {
+            oss << "    call_service_ex<" << input_type << ", void>(\n";
+        } else {
+            oss << "    call_service<" << input_type << ", void>(\n";
+        }
+    }
+    oss << "        \"" << soap_action << "\",\n";
+    oss << "        request,\n";
+    oss << "        \"" << operation.name << "\",\n";  // request_element_name
+    if (!output_type.empty() && output_type != "void") {
+        oss << "        \"" << operation.name << "Response\",\n";  // response_element_name
+    } else {
+        oss << "        \"" << operation.name << "Response\",\n";
+    }
+    // 如果使用 call_service_ex，需要传递命名空间前缀
+    if (use_service_ex) {
+        oss << "        \"" << operation.source_ns_prefix << "\",\n";  // namespace_prefix
+    }
+    oss << "        callback\n";
+    oss << "    );\n";
+    oss << "}\n\n";
+    
+    return oss.str();
+}
+
+std::string ClientGenerator::generate_operation_inline_implementation(
+    const WsdlService& service,
+    const WsdlOperation& operation) const {
+
+    std::ostringstream oss;
+
+    std::string input_type = map_message_to_cpp_type(operation.input_type);
+    std::string output_type = map_message_to_cpp_type(operation.output_type);
+
+    // 构造SOAP Action
+    std::string soap_action = operation.soap_action;
+    if (soap_action.empty()) {
+        soap_action = service.target_namespace + "/" + operation.name;
+    }
+
+    // 判断是否需要使用 call_service_ex（当操作来自不同命名空间时）
+    bool use_service_ex = (!operation.source_namespace.empty() &&
+                           operation.source_namespace != service.target_namespace);
+
+    // 生成文档注释
+    oss << "    /**\n";
+    oss << "     * @brief " << operation.name << " operation\n";
+    if (!operation.documentation.empty()) {
+        oss << "     * @note " << operation.documentation << "\n";
+    }
+    oss << "     * @param request Request parameters\n";
+    oss << "     * @param callback Result callback\n";
+    oss << "     */\n";
+
+    // 生成内联方法实现
+    if (!output_type.empty() && output_type != "void") {
+        oss << "    void " << operation.name << "(const " << input_type << "& request,\n";
+        oss << "                           const OnvifCallback<" << output_type << ">& callback) {\n";
+        if (use_service_ex) {
+            oss << "        call_service_ex<" << input_type << ", " << output_type << ">(\n";
+        } else {
+            oss << "        call_service<" << input_type << ", " << output_type << ">(\n";
+        }
+    } else {
+        oss << "    void " << operation.name << "(const " << input_type << "& request,\n";
+        oss << "                           const OnvifSimpleCallback& callback) {\n";
+        if (use_service_ex) {
+            oss << "        call_service_ex<" << input_type << ", void>(\n";
+        } else {
+            oss << "        call_service<" << input_type << ", void>(\n";
+        }
+    }
+    oss << "            \"" << soap_action << "\",\n";
+    oss << "            request,\n";
+    oss << "            \"" << operation.name << "\",\n";
+    oss << "            \"" << operation.name << "Response\",\n";
+    if (use_service_ex) {
+        oss << "            \"" << operation.source_ns_prefix << "\",\n";
+    }
+    oss << "            callback\n";
+    oss << "        );\n";
+    oss << "    }\n\n";
+
+    return oss.str();
+}
+
+std::string ClientGenerator::get_client_class_name(const WsdlService& service) const {
+    std::string class_name;
+
+    // 第一优先级：查找schema配置中的自定义类名
+    if (!service.target_namespace.empty()) {
+        for (const auto& schema_config : config_.schema_configs) {
+            if (schema_config.ns_url == service.target_namespace) {
+                if (!schema_config.client_class_name.empty()) {
+                    class_name = schema_config.client_class_name;
+
+                    // 如果配置的名字没有Client后缀，自动添加
+                    if (class_name.size() < 6 || class_name.substr(class_name.size() - 6) != "Client") {
+                        class_name += "Client";
+                    }
+
+                    // 确保首字母大写
+                    if (!class_name.empty()) {
+                        class_name[0] = std::toupper(class_name[0]);
+                    }
+
+                    return class_name;
+                }
+                break;
+            }
+        }
+    }
+
+    // 第二优先级：使用第一个portType的名字
+    class_name = service.name;
+
+    // 移除Service后缀
+    if (class_name.size() > 7 && class_name.substr(class_name.size() - 7) == "Service") {
+        class_name = class_name.substr(0, class_name.size() - 7);
+    }
+
+    // 添加Client后缀
+    class_name += "Client";
+
+    // 确保首字母大写
+    if (!class_name.empty()) {
+        class_name[0] = std::toupper(class_name[0]);
+    }
+
+    return class_name;
+}
+
+std::string ClientGenerator::map_message_to_cpp_type(const std::string& element_name) const {
+    if (element_name.empty()) {
+        return "void";
+    }
+
+    std::string type_name = element_name;
+
+    // 将命名空间前缀的冒号替换为下划线 (例如: tds:GetServices -> tds_GetServices)
+    size_t colon_pos = type_name.find(':');
+    if (colon_pos != std::string::npos) {
+        type_name[colon_pos] = '_';
+    }
+
+    // 确保类型名符合C++命名规范
+    std::replace(type_name.begin(), type_name.end(), '-', '_');
+
+    return type_name;
+}
+
+std::string ClientGenerator::extract_namespace_prefix(const WsdlService& service) const {
+    // 在 namespaces 映射中查找与 target_namespace 匹配的前缀
+    for (const auto& [prefix, uri] : service.namespaces) {
+        if (uri == service.target_namespace) {
+            return prefix;
+        }
+    }
+
+    return "unknown";
+}
+
+std::string ClientGenerator::generate_service_registration(
+    const WsdlService& service,
+    const std::string& class_name) const {
+
+    std::ostringstream oss;
+
+    // 从 service 的 namespaces 中提取命名空间前缀
+    std::string friendly_name = extract_namespace_prefix(service);
+
+    // 生成唯一的注册变量名
+    std::string var_name = friendly_name + "_service_registrar";
+
+    oss << "// 自动注册 " << friendly_name << " 服务客户端到工厂\n";
+    oss << "static ServiceClientRegistrar " << var_name << "(\n";
+    oss << "    " << class_name <<"::TARGET_NAMESPACE,\n";
+    oss << "    " << class_name <<"::TARGET_NAMESPACE_PREFIX,\n";
+    oss << "    [](const std::string& endpoint, const std::shared_ptr<IHttpClient> &http_client,\n";
+    oss << "       const std::string& username, const std::string& password) -> std::shared_ptr<OnvifServiceBase> {\n";
+    oss << "        return std::make_shared<" << class_name << ">(endpoint, http_client, username, password);\n";
+    oss << "    }\n";
+    oss << ");";
+
+    return oss.str();
+}
+
+} // namespace wsdl_parser2

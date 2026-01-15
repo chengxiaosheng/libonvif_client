@@ -1,0 +1,265 @@
+{
+  "output_dir": "./generated",
+  "cache_dir": "./cache",
+  "generate": true,
+  "generate_clients": true,
+  "verbose": false,
+  "ignore_missing_deps": false,
+  "detect_duplicates": true,
+  "smart_merge": true,
+  "client_namespace": "libonvif_client",
+  "output_types_header_dir": "/home/kevin/Projects/c++/worktree/open-media-server/onvif/libs/pub/libonvif_client/include/libonvif_client/types",
+  "output_client_header_dir": "/home/kevin/Projects/c++/worktree/open-media-server/onvif/libs/pub/libonvif_client/include/libonvif_client/client",
+  "output_client_source_dir": "/home/kevin/Projects/c++/worktree/open-media-server/onvif/libs/pub/libonvif_client/src/client",
+  "schema_configs": [
+    {
+      "comment": "基础XML相关命名空间",
+      "ns_url": "http://www.w3.org/2005/05/xmlmime",
+      "ns_prefix": "xmime",
+      "output_name": "xmime",
+      "source_files": ["xmlmime.xml"],
+      "priority": 1
+    },
+    {
+      "ns_url": "http://www.w3.org/2003/05/soap-envelope",
+      "ns_prefix": "soap",
+      "output_name": "soap",
+      "source_files": ["soap-envelope.xml"],
+      "priority": 1
+    },
+    {
+      "ns_url": "http://www.w3.org/2005/08/addressing",
+      "ns_prefix": "wsa",
+      "output_name": "wsa",
+      "priority": 1
+    },
+    {
+      "ns_url": "http://www.w3.org/2004/08/xop/include",
+      "ns_prefix": "xop",
+      "output_name": "xop",
+      "priority": 1
+    },
+    {
+      "comment": "WS-* 规范相关",
+      "ns_url": "http://docs.oasis-open.org/wsrf/bf-2",
+      "ns_prefix": "wsrf_bf",
+      "output_name": "wsrf_bf",
+      "priority": 2
+    },
+    {
+      "ns_url": "http://docs.oasis-open.org/wsn/b-2",
+      "ns_prefix": "wsnt",
+      "output_name": "wsnt",
+      "priority": 2
+    },
+    {
+      "ns_url": "http://docs.oasis-open.org/wsn/t-1",
+      "ns_prefix": "wstop",
+      "output_name": "wstop",
+      "priority": 2
+    },
+    {
+      "comment": "ONVIF核心Schema - 分离生成以避免循环依赖",
+      "ns_url": "http://www.onvif.org/ver10/schema",
+      "ns_prefix": "tt",
+      "output_name": "common",
+      "source_files": ["common_v10.xsd"],
+      "priority": 10
+    },
+    {
+      "comment": "ONVIF核心Schema - 分离生成以避免循环依赖",
+      "ns_url": "http://www.onvif.org/ver10/schema",
+      "ns_prefix": "tt",
+      "output_name": "tt",
+      "source_files": ["onvif_v10.xsd"],
+      "priority": 10
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/schema",
+      "ns_prefix": "tt",
+      "output_name": "metadata",
+      "source_files": ["metadatastream_v10.xsd"],
+      "priority": 10
+    },
+    {
+      "comment": "ONVIF Analytics相关Schema",
+      "ns_url": "http://www.onvif.org/ver20/analytics/humanface",
+      "ns_prefix": "fc",
+      "output_name": "fc",
+      "source_files": ["humanface_v20.xsd"],
+      "priority": 5
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver20/analytics/humanbody",
+      "ns_prefix": "bd",
+      "output_name": "bd",
+      "source_files": ["humanbody_v20.xsd"],
+      "priority": 5
+    },
+    {
+      "comment": "ONVIF服务WSDL - 每个文件单独生成",
+      "ns_url": "http://www.onvif.org/ver10/device/wsdl",
+      "ns_prefix": "tds",
+      "output_name": "tds",
+      "source_files": ["devicemgmt_v10.wsdl"],
+      "priority": 9
+    },
+    {
+      "comment": "ONVIF服务WSDL - 每个文件单独生成",
+      "ns_url": "http://www.onvif.org/ver10/deviceIO/wsdl",
+      "ns_prefix": "tmd",
+      "output_name": "tmd",
+      "source_files": ["deviceio_v10.wsdl"],
+      "priority": 9
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/media/wsdl",
+      "ns_prefix": "trt",
+      "output_name": "trt",
+      "source_files": ["media_v10.wsdl"],
+      "priority": 6
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver20/media/wsdl",
+      "ns_prefix": "tr2",
+      "output_name": "tr2",
+      "source_files": ["media_v20.wsdl"],
+      "priority": 6
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/thermal/wsdl",
+      "ns_prefix": "tth",
+      "output_name": "tth",
+      "source_files": ["thermal_v10.wsdl"],
+      "priority": 6
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/actionengine/wsdl",
+      "ns_prefix": "tae",
+      "output_name": "tae",
+      "source_files": ["actionengine_v10.wsdl"],
+      "priority": 6
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/accesscontrol/wsdl",
+      "ns_prefix": "tac",
+      "output_name": "tac",
+      "source_files": ["accesscontrol_v10.wsdl"],
+      "priority": 6
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/doorcontrol/wsdl",
+      "ns_prefix": "tdc",
+      "output_name": "tdc",
+      "source_files": ["doorcontrol_v10.wsdl"],
+      "priority": 6
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/events/wsdl",
+      "ns_prefix": "tev",
+      "output_name": "tev",
+      "client_class_name": "EventClient",
+      "source_files": ["event_v10.wsdl"],
+      "priority": 6
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver20/ptz/wsdl",
+      "ns_prefix": "tptz",
+      "output_name": "tptz",
+      "source_files": ["ptz_v20.wsdl"],
+      "priority": 6
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver20/imaging/wsdl",
+      "ns_prefix": "timg",
+      "output_name": "timg",
+      "source_files": ["imaging_v20.wsdl"],
+      "priority": 6
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/receiver/wsdl",
+      "ns_prefix": "tvr",
+      "output_name": "tvr",
+      "source_files": ["receiver_v10.wsdl"],
+      "priority": 6
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver20/analytics/wsdl",
+      "ns_prefix": "tan",
+      "output_name": "tan",
+      "source_files": ["analytics_v20.wsdl"],
+      "priority": 8
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/analyticsdevice/wsdl",
+      "ns_prefix": "tad",
+      "output_name": "tad",
+      "source_files": ["analyticsdevice_v10.wsdl"],
+      "priority": 8
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/network/wsdl",
+      "ns_prefix": "tdn",
+      "output_name": "tdn",
+      "source_files": ["network_v10.wsdl"],
+      "priority": 8
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/replay/wsdl",
+      "ns_prefix": "trp",
+      "output_name": "trp",
+      "source_files": ["replay_v10.wsdl"],
+      "priority": 7
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/search/wsdl",
+      "ns_prefix": "tse",
+      "output_name": "tse",
+      "source_files": ["search_v10.wsdl"],
+      "priority": 7
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/recording/wsdl",
+      "ns_prefix": "trc",
+      "output_name": "trc",
+      "source_files": ["recording_v10.wsdl"],
+      "priority": 7
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/advancedsecurity/wsdl",
+      "ns_prefix": "tas",
+      "output_name": "tas",
+      "source_files": ["advancedsecurity_v10.wsdl"],
+      "priority": 7
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/accessrules/wsdl",
+      "ns_prefix": "tar",
+      "output_name": "tar",
+      "source_files": ["accessrules_v10.wsdl"],
+      "priority": 7
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/schedule/wsdl",
+      "ns_prefix": "tsc",
+      "output_name": "tsc",
+      "source_files": ["schedule_v10.wsdl"],
+      "priority": 7
+    },
+    {
+      "ns_url": "http://www.onvif.org/ver10/credential/wsdl",
+      "ns_prefix": "tac",
+      "output_name": "tac",
+      "source_files": ["credential_v10.wsdl"],
+      "priority": 7
+    },
+    {
+      "comment": "XML基础命名空间",
+      "ns_url": "http://www.w3.org/XML/1998/namespace",
+      "ns_prefix": "xs",
+      "output_name": "xs",
+      "source_files": ["xml.xsd"],
+      "priority": 1
+    }
+  ]
+}
