@@ -70,7 +70,10 @@ public:
     static my_Duration form_string(const std::string& durationStr) {
         size_t pos = 0;
         bool negative = false;
-        if (durationStr.empty()) throw std::invalid_argument("Empty duration");
+        if (durationStr.empty()) {
+            // throw std::invalid_argument("Empty duration");
+            return my_Duration(std::chrono::seconds(0));
+        }
 
         // 处理负号
         if (durationStr[0] == '-') {
@@ -79,8 +82,11 @@ public:
         }
 
         // 验证P前缀
-        if (pos >= durationStr.size() || durationStr[pos] != 'P')
+        if (pos >= durationStr.size() || durationStr[pos] != 'P') {
             throw std::invalid_argument("Missing 'P' in duration");
+            return my_Duration(std::chrono::seconds(0));
+        }
+
 
         pos++;
         std::chrono::seconds total(0);
@@ -97,9 +103,9 @@ public:
             pos = parseComponent(durationStr, pos, 'M', total, 60);     // 分钟
             pos = parseComponent(durationStr, pos, 'S', total, 1);      // 秒
         }
-
-        if (pos != durationStr.size())
-            throw std::invalid_argument("Invalid duration format");
+        // 忽略
+        // if (pos != durationStr.size())
+        //     throw std::invalid_argument("Invalid duration format");
 
         return my_Duration(negative ? -total : total);
     }
@@ -152,15 +158,13 @@ private:
         const size_t start = pos;
         while (pos < str.size() && isdigit(str[pos])) pos++;
 
-        if (start != pos) {
-            if (pos >= str.size() || str[pos] != unit)
-                throw std::invalid_argument(std::string("Missing '") + unit + "'");
-
+        if (start != pos && pos < str.size() && str[pos] == unit) {
             int value = std::stoi(str.substr(start, pos - start));
             total += std::chrono::seconds(value * multiplier);
-            pos++;
+            return pos + 1;
         }
-        return pos;
+        // Digits don't belong to this unit — leave them for the next component
+        return start;
     }
     std::chrono::seconds seconds_{0};
 };
@@ -201,7 +205,8 @@ public:
 
         // 解析时分秒
         if (sscanf(time_part.c_str(), "%d:%d:%d", &hours, &minutes, &seconds) < 2) {
-            throw std::invalid_argument("Invalid time format: " + timeStr);
+            // throw std::invalid_argument("Invalid time format: " + timeStr);
+            return my_TimePart(std::chrono::microseconds(0));
         }
 
         // 解析微秒
