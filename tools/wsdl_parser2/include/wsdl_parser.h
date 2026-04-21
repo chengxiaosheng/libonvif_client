@@ -174,7 +174,29 @@ private:
      * @param ns_prefix 命名空间前缀
      */
     void parse_any_element(WsdlType& type, xmlNodePtr any_node, const std::string& ns_prefix);
-    
+
+    /**
+     * @brief 解析sequence节点的子节点（element/any/choice）
+     * @param type 类型定义
+     * @param sequence_node sequence节点
+     * @param ns_prefix 命名空间前缀
+     * @param file_info 文件信息
+     */
+    void parse_sequence_children(WsdlType& type, xmlNodePtr sequence_node,
+                                  const std::string& ns_prefix,
+                                  std::shared_ptr<FileInfo> file_info);
+
+    /**
+     * @brief 解析xs:choice元素
+     * @param type 类型定义
+     * @param choice_node choice节点
+     * @param ns_prefix 命名空间前缀
+     * @param file_info 文件信息
+     */
+    void parse_choice(WsdlType& type, xmlNodePtr choice_node,
+                       const std::string& ns_prefix,
+                       std::shared_ptr<FileInfo> file_info);
+
     /**
      * @brief 解析xs:anyAttribute
      * @param type 类型定义

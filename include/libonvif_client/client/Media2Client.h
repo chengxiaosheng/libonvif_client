@@ -912,6 +912,54 @@ public:
         );
     }
 
+    /**
+     * @brief GetMulticastAudioDecoderConfigurations operation
+     * @param request Request parameters
+     * @param callback Result callback
+     */
+    void GetMulticastAudioDecoderConfigurations(const tr2_GetMulticastAudioDecoderConfigurations& request,
+                           const OnvifCallback<tr2_GetMulticastAudioDecoderConfigurationsResponse>& callback) {
+        call_service<tr2_GetMulticastAudioDecoderConfigurations, tr2_GetMulticastAudioDecoderConfigurationsResponse>(
+            "http://www.onvif.org/ver20/media/wsdl/GetMulticastAudioDecoderConfigurations",
+            request,
+            "GetMulticastAudioDecoderConfigurations",
+            "GetMulticastAudioDecoderConfigurationsResponse",
+            callback
+        );
+    }
+
+    /**
+     * @brief GetMulticastAudioDecoderConfigurationOptions operation
+     * @param request Request parameters
+     * @param callback Result callback
+     */
+    void GetMulticastAudioDecoderConfigurationOptions(const tr2_GetMulticastAudioDecoderConfigurationOptions& request,
+                           const OnvifCallback<tr2_GetMulticastAudioDecoderConfigurationOptionsResponse>& callback) {
+        call_service<tr2_GetMulticastAudioDecoderConfigurationOptions, tr2_GetMulticastAudioDecoderConfigurationOptionsResponse>(
+            "http://www.onvif.org/ver20/media/wsdl/GetMulticastAudioDecoderConfigurationOptions",
+            request,
+            "GetMulticastAudioDecoderConfigurationOptions",
+            "GetMulticastAudioDecoderConfigurationOptionsResponse",
+            callback
+        );
+    }
+
+    /**
+     * @brief SetMulticastAudioDecoderConfiguration operation
+     * @param request Request parameters
+     * @param callback Result callback
+     */
+    void SetMulticastAudioDecoderConfiguration(const tr2_SetMulticastAudioDecoderConfiguration& request,
+                           const OnvifCallback<tr2_SetMulticastAudioDecoderConfigurationResponse>& callback) {
+        call_service<tr2_SetMulticastAudioDecoderConfiguration, tr2_SetMulticastAudioDecoderConfigurationResponse>(
+            "http://www.onvif.org/ver20/media/wsdl/SetMulticastAudioDecoderConfiguration",
+            request,
+            "SetMulticastAudioDecoderConfiguration",
+            "SetMulticastAudioDecoderConfigurationResponse",
+            callback
+        );
+    }
+
     const char *get_namespace_prefix() const override {
         return TARGET_NAMESPACE_PREFIX;
     }

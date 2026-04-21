@@ -46,6 +46,7 @@ struct WsdlField {
     mutable bool cpp_type_cached = false;       // C++类型是否已缓存
     mutable bool cpp_field_name_cached = false; // C++字段名是否已缓存
 
+    int choice_group = 0;                       // choice group ID (0 = not in a choice, >0 = belongs to xs:choice)
     std::string any_namespace;
     std::string process_contents;               // 处理内容方式（strict/lax/skip）
     

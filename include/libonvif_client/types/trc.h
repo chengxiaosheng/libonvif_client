@@ -95,6 +95,8 @@ struct trc_Capabilities {
     std::optional<tt_StringAttrList> SupportedEncryptionModes;
     // Indicates if the device supports the OverrideSegmentDuration command.
     std::optional<bool> OverrideSegmentDuration;
+    // Indicates if the device supports asymmetric encryption.
+    std::optional<bool> AsymmetricEncryptionSupported;
     // Any attributes allowed (namespace: ##other, processContents: lax)
     std::optional<std::map<std::string, std::string>> _attrs_;
 };
@@ -122,6 +124,7 @@ struct xml_convert::XmlTraits<trc_Capabilities> {
         xml_convert::make_field_desc("EncryptionEntryLimit", &trc_Capabilities::EncryptionEntryLimit, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("SupportedEncryptionModes", &trc_Capabilities::SupportedEncryptionModes, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("OverrideSegmentDuration", &trc_Capabilities::OverrideSegmentDuration, nullptr, xml_convert::serialize_type::attribute),
+        xml_convert::make_field_desc("AsymmetricEncryptionSupported", &trc_Capabilities::AsymmetricEncryptionSupported, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("_attrs_", &trc_Capabilities::_attrs_, nullptr, xml_convert::serialize_type::attribute)
     );
 };

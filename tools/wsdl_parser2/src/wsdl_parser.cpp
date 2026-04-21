@@ -381,16 +381,7 @@ void WsdlParser::parse_complex_type(std::shared_ptr<FileInfo> file_info,
         std::string node_name = reinterpret_cast<const char*>(child->name);
         
         if (node_name == "sequence") {
-            for (xmlNodePtr seq_child = child->children; seq_child; seq_child = seq_child->next) {
-                if (seq_child->type == XML_ELEMENT_NODE) {
-                    std::string seq_node_name = reinterpret_cast<const char*>(seq_child->name);
-                    if (seq_node_name == "element") {
-                        parse_element(type, seq_child, file_info->namespace_prefix, file_info);
-                    } else if (seq_node_name == "any") {
-                        parse_any_element(type, seq_child, file_info->namespace_prefix);
-                    }
-                }
-            }
+            parse_sequence_children(type, child, file_info->namespace_prefix, file_info);
         } else if (node_name == "attribute") {
             parse_attribute(file_info, type, child);
         } else if (node_name == "anyAttribute") {
@@ -399,7 +390,7 @@ void WsdlParser::parse_complex_type(std::shared_ptr<FileInfo> file_info,
             parse_inheritance(type, child, file_info->namespace_prefix, file_info);
         }
     }
-    
+
     file_info->types.push_back(type);
     // 设置字段的父级类型引用以优化后续查找
 }
@@ -433,16 +424,7 @@ void WsdlParser::parse_top_level_element(std::shared_ptr<FileInfo> file_info, xm
                 if (ct_child->type == XML_ELEMENT_NODE) {
                     std::string ct_node_name = reinterpret_cast<const char*>(ct_child->name);
                     if (ct_node_name == "sequence") {
-                        for (xmlNodePtr seq_child = ct_child->children; seq_child; seq_child = seq_child->next) {
-                            if (seq_child->type == XML_ELEMENT_NODE) {
-                                std::string seq_node_name = reinterpret_cast<const char*>(seq_child->name);
-                                if (seq_node_name == "element") {
-                                    parse_element(type, seq_child, file_info->namespace_prefix, file_info);
-                                } else if (seq_node_name == "any") {
-                                    parse_any_element(type, seq_child, file_info->namespace_prefix);
-                                }
-                            }
-                        }
+                        parse_sequence_children(type, ct_child, file_info->namespace_prefix, file_info);
                     } else if (ct_node_name == "attribute") {
                         parse_attribute(file_info, type, ct_child);
                     } else if (ct_node_name == "anyAttribute") {
@@ -730,16 +712,7 @@ void WsdlParser::parse_element(WsdlType& type, xmlNodePtr element_node, const st
                             
                             std::string ct_node_name = reinterpret_cast<const char*>(ct_child->name);
                             if (ct_node_name == "sequence") {
-                                for (xmlNodePtr seq_child = ct_child->children; seq_child; seq_child = seq_child->next) {
-                                    if (seq_child->type == XML_ELEMENT_NODE) {
-                                        std::string seq_node_name = reinterpret_cast<const char*>(seq_child->name);
-                                        if (seq_node_name == "element") {
-                                            parse_element(inline_type, seq_child, ns_prefix, current_file_info);
-                                        } else if (seq_node_name == "any") {
-                                            parse_any_element(inline_type, seq_child, ns_prefix);
-                                        }
-                                    }
-                                }
+                                parse_sequence_children(inline_type, ct_child, ns_prefix, current_file_info);
                             } else if (ct_node_name == "attribute") {
                                 parse_attribute(current_file_info, inline_type, ct_child);
                             } else if (ct_node_name == "anyAttribute") {
@@ -905,6 +878,59 @@ void WsdlParser::parse_any_element(WsdlType& type, xmlNodePtr any_node, const st
     type.fields.push_back(field);
 }
 
+void WsdlParser::parse_sequence_children(WsdlType& type, xmlNodePtr sequence_node,
+                                           const std::string& ns_prefix,
+                                           std::shared_ptr<FileInfo> file_info) {
+    for (xmlNodePtr child = sequence_node->children; child; child = child->next) {
+        if (child->type != XML_ELEMENT_NODE) continue;
+
+        std::string node_name = reinterpret_cast<const char*>(child->name);
+
+        if (node_name == "element") {
+            parse_element(type, child, ns_prefix, file_info);
+        } else if (node_name == "any") {
+            parse_any_element(type, child, ns_prefix);
+        } else if (node_name == "choice") {
+            parse_choice(type, child, ns_prefix, file_info);
+        }
+    }
+}
+
+void WsdlParser::parse_choice(WsdlType& type, xmlNodePtr choice_node,
+                                const std::string& ns_prefix,
+                                std::shared_ptr<FileInfo> file_info) {
+    static int choice_group_counter = 0;
+    int current_group = ++choice_group_counter;
+
+    for (xmlNodePtr child = choice_node->children; child; child = child->next) {
+        if (child->type != XML_ELEMENT_NODE) continue;
+
+        std::string node_name = reinterpret_cast<const char*>(child->name);
+
+        if (node_name == "element") {
+            parse_element(type, child, ns_prefix, file_info);
+            if (!type.fields.empty()) {
+                auto& field = type.fields.back();
+                field.is_optional = true;
+                field.choice_group = current_group;
+                field.clear_cache();
+            }
+        } else if (node_name == "any") {
+            parse_any_element(type, child, ns_prefix);
+            if (!type.fields.empty()) {
+                auto& field = type.fields.back();
+                field.is_optional = true;
+                field.choice_group = current_group;
+                field.clear_cache();
+            }
+        } else if (node_name == "sequence") {
+            parse_sequence_children(type, child, ns_prefix, file_info);
+        } else if (node_name == "choice") {
+            parse_choice(type, child, ns_prefix, file_info);
+        }
+    }
+}
+
 void WsdlParser::parse_any_attribute(WsdlType& type, xmlNodePtr any_attr_node) {
     WsdlField field;
     field.name = "_attrs_";
@@ -996,16 +1022,7 @@ void WsdlParser::parse_inheritance(WsdlType& type, xmlNodePtr content_node, cons
                 std::string ext_node_name = reinterpret_cast<const char*>(ext_child->name);
                 
                 if (ext_node_name == "sequence") {
-                    for (xmlNodePtr seq_child = ext_child->children; seq_child; seq_child = seq_child->next) {
-                        if (seq_child->type == XML_ELEMENT_NODE) {
-                            std::string seq_name = reinterpret_cast<const char*>(seq_child->name);
-                            if (seq_name == "element") {
-                                parse_element(type, seq_child, ns_prefix, file_info);
-                            } else if (seq_name == "any") {
-                                parse_any_element(type, seq_child, ns_prefix);
-                            }
-                        }
-                    }
+                    parse_sequence_children(type, ext_child, ns_prefix, file_info);
                 } else if (ext_node_name == "attribute") {
                     parse_attribute(file_info, type, ext_child);
                 } else if (ext_node_name == "anyAttribute") {

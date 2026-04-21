@@ -968,7 +968,9 @@ enum class  tt_ObjectType {
     Vehicle,
     LicensePlate,
     Bike,
-    Barcode
+    Barcode,
+    Fire,
+    Smoke
 };
 
 // 字符串转换函数
@@ -982,6 +984,8 @@ inline std::string to_string(tt_ObjectType value) {
         case tt_ObjectType::LicensePlate: return "LicensePlate";
         case tt_ObjectType::Bike: return "Bike";
         case tt_ObjectType::Barcode: return "Barcode";
+        case tt_ObjectType::Fire: return "Fire";
+        case tt_ObjectType::Smoke: return "Smoke";
         default: return "";
     }
 }
@@ -995,6 +999,8 @@ inline bool from_string(tt_ObjectType& value, const std::string& str) {
     if (str == "LicensePlate") { value = tt_ObjectType::LicensePlate; return true; }
     if (str == "Bike") { value = tt_ObjectType::Bike; return true; }
     if (str == "Barcode") { value = tt_ObjectType::Barcode; return true; }
+    if (str == "Fire") { value = tt_ObjectType::Fire; return true; }
+    if (str == "Smoke") { value = tt_ObjectType::Smoke; return true; }
     return false;
 }
 
@@ -1446,20 +1452,90 @@ struct xml_convert::XmlTraits<tt_Frame> {
 };
 
 
-// MetadataStream 类型定义
+// ObjectState 类型定义
 // 命名空间: http://www.onvif.org/ver10/schema
 // 源文件: metadatastream_v10.xsd
-struct tt_MetadataStream {
+struct tt_ObjectState : public tt_Object {
+    std::string CaptureTime;
     // Any attributes allowed (namespace: ##other, processContents: lax)
     std::optional<std::map<std::string, std::string>> _attrs_;
 };
 
 
-// XmlTraits for tt_MetadataStream
+// XmlTraits for tt_ObjectState
 template<>
-struct xml_convert::XmlTraits<tt_MetadataStream> {
+struct xml_convert::XmlTraits<tt_ObjectState> {
+    static constexpr auto fields = std::tuple_cat(xml_convert::XmlTraits<tt_Object>::fields, std::make_tuple(
+        xml_convert::make_field_desc("CaptureTime", &tt_ObjectState::CaptureTime, nullptr, xml_convert::serialize_type::attribute),
+        xml_convert::make_field_desc("_attrs_", &tt_ObjectState::_attrs_, nullptr, xml_convert::serialize_type::attribute))
+    );
+};
+
+
+// ObjectTrack 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: metadatastream_v10.xsd
+struct tt_ObjectTrack {
+    std::vector<tt_ObjectState> ObjectState;
+    // Any attributes allowed (namespace: ##other, processContents: lax)
+    std::optional<std::map<std::string, std::string>> _attrs_;
+};
+
+
+// XmlTraits for tt_ObjectTrack
+template<>
+struct xml_convert::XmlTraits<tt_ObjectTrack> {
     static constexpr auto fields = std::make_tuple(
-        xml_convert::make_field_desc("_attrs_", &tt_MetadataStream::_attrs_, nullptr, xml_convert::serialize_type::attribute)
+        xml_convert::make_field_desc("ObjectState", &tt_ObjectTrack::ObjectState, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("_attrs_", &tt_ObjectTrack::_attrs_, nullptr, xml_convert::serialize_type::attribute)
+    );
+};
+
+
+// VideoAnalyticsStream 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: metadatastream_v10.xsd
+struct tt_VideoAnalyticsStream {
+};
+
+
+// XmlTraits for tt_VideoAnalyticsStream
+template<>
+struct xml_convert::XmlTraits<tt_VideoAnalyticsStream> {
+    static constexpr auto fields = std::make_tuple(
+
+    );
+};
+
+
+// PTZStream 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: metadatastream_v10.xsd
+struct tt_PTZStream {
+};
+
+
+// XmlTraits for tt_PTZStream
+template<>
+struct xml_convert::XmlTraits<tt_PTZStream> {
+    static constexpr auto fields = std::make_tuple(
+
+    );
+};
+
+
+// EventStream 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: metadatastream_v10.xsd
+struct tt_EventStream {
+};
+
+
+// XmlTraits for tt_EventStream
+template<>
+struct xml_convert::XmlTraits<tt_EventStream> {
+    static constexpr auto fields = std::make_tuple(
+
     );
 };
 
@@ -1576,18 +1652,36 @@ struct xml_convert::XmlTraits<tt_MetadataStreamExtension> {
 };
 
 
-// VideoAnalyticsStream 类型定义
+// MetadataStream 类型定义
 // 命名空间: http://www.onvif.org/ver10/schema
 // 源文件: metadatastream_v10.xsd
-struct tt_VideoAnalyticsStream {
+struct tt_MetadataStream {
+    // xs:choice group 2 (mutually exclusive)
+    std::optional<tt_VideoAnalyticsStream> VideoAnalytics;
+    // xs:choice group 2 (mutually exclusive)
+    std::optional<tt_PTZStream> PTZ;
+    // xs:choice group 2 (mutually exclusive)
+    std::optional<tt_EventStream> Event;
+    // xs:choice group 2 (mutually exclusive)
+    std::optional<tt_MetadataStreamExtension> Extension;
+    // xs:choice group 2 (mutually exclusive)
+    // Collection of any elements from namespace: ##any (processContents: lax)
+    std::vector<AnyElement> _any_;
+    // Any attributes allowed (namespace: ##other, processContents: lax)
+    std::optional<std::map<std::string, std::string>> _attrs_;
 };
 
 
-// XmlTraits for tt_VideoAnalyticsStream
+// XmlTraits for tt_MetadataStream
 template<>
-struct xml_convert::XmlTraits<tt_VideoAnalyticsStream> {
+struct xml_convert::XmlTraits<tt_MetadataStream> {
     static constexpr auto fields = std::make_tuple(
-
+        xml_convert::make_field_desc("VideoAnalytics", &tt_MetadataStream::VideoAnalytics, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("PTZ", &tt_MetadataStream::PTZ, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("Event", &tt_MetadataStream::Event, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("Extension", &tt_MetadataStream::Extension, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("_any_", &tt_MetadataStream::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element),
+        xml_convert::make_field_desc("_attrs_", &tt_MetadataStream::_attrs_, nullptr, xml_convert::serialize_type::attribute)
     );
 };
 
@@ -1610,22 +1704,6 @@ struct xml_convert::XmlTraits<tt_VideoAnalyticsStreamExtension> {
 };
 
 
-// PTZStream 类型定义
-// 命名空间: http://www.onvif.org/ver10/schema
-// 源文件: metadatastream_v10.xsd
-struct tt_PTZStream {
-};
-
-
-// XmlTraits for tt_PTZStream
-template<>
-struct xml_convert::XmlTraits<tt_PTZStream> {
-    static constexpr auto fields = std::make_tuple(
-
-    );
-};
-
-
 // PTZStreamExtension 类型定义
 // 命名空间: http://www.onvif.org/ver10/schema
 // 源文件: metadatastream_v10.xsd
@@ -1640,22 +1718,6 @@ template<>
 struct xml_convert::XmlTraits<tt_PTZStreamExtension> {
     static constexpr auto fields = std::make_tuple(
         xml_convert::make_field_desc("_any_", &tt_PTZStreamExtension::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element)
-    );
-};
-
-
-// EventStream 类型定义
-// 命名空间: http://www.onvif.org/ver10/schema
-// 源文件: metadatastream_v10.xsd
-struct tt_EventStream {
-};
-
-
-// XmlTraits for tt_EventStream
-template<>
-struct xml_convert::XmlTraits<tt_EventStream> {
-    static constexpr auto fields = std::make_tuple(
-
     );
 };
 

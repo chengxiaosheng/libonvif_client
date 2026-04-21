@@ -401,6 +401,54 @@ public:
     }
 
     /**
+     * @brief GetUserRoles operation
+     * @param request Request parameters
+     * @param callback Result callback
+     */
+    void GetUserRoles(const tds_GetUserRoles& request,
+                           const OnvifCallback<tds_GetUserRolesResponse>& callback) {
+        call_service<tds_GetUserRoles, tds_GetUserRolesResponse>(
+            "http://www.onvif.org/ver10/device/wsdl/GetUserRoles",
+            request,
+            "GetUserRoles",
+            "GetUserRolesResponse",
+            callback
+        );
+    }
+
+    /**
+     * @brief SetUserRole operation
+     * @param request Request parameters
+     * @param callback Result callback
+     */
+    void SetUserRole(const tds_SetUserRole& request,
+                           const OnvifCallback<tds_SetUserRoleResponse>& callback) {
+        call_service<tds_SetUserRole, tds_SetUserRoleResponse>(
+            "http://www.onvif.org/ver10/device/wsdl/SetUserRole",
+            request,
+            "SetUserRole",
+            "SetUserRoleResponse",
+            callback
+        );
+    }
+
+    /**
+     * @brief DeleteUserRole operation
+     * @param request Request parameters
+     * @param callback Result callback
+     */
+    void DeleteUserRole(const tds_DeleteUserRole& request,
+                           const OnvifCallback<tds_DeleteUserRoleResponse>& callback) {
+        call_service<tds_DeleteUserRole, tds_DeleteUserRoleResponse>(
+            "http://www.onvif.org/ver10/device/wsdl/DeleteUserRole",
+            request,
+            "DeleteUserRole",
+            "DeleteUserRoleResponse",
+            callback
+        );
+    }
+
+    /**
      * @brief GetRemoteUser operation
      * @param request Request parameters
      * @param callback Result callback
@@ -1164,6 +1212,22 @@ public:
             request,
             "StartFirmwareUpgrade",
             "StartFirmwareUpgradeResponse",
+            callback
+        );
+    }
+
+    /**
+     * @brief UpgradeFirmware operation
+     * @param request Request parameters
+     * @param callback Result callback
+     */
+    void UpgradeFirmware(const tds_UpgradeFirmware& request,
+                           const OnvifCallback<tds_UpgradeFirmwareResponse>& callback) {
+        call_service<tds_UpgradeFirmware, tds_UpgradeFirmwareResponse>(
+            "http://www.onvif.org/ver10/device/wsdl/UpgradeFirmware",
+            request,
+            "UpgradeFirmware",
+            "UpgradeFirmwareResponse",
             callback
         );
     }

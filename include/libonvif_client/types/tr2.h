@@ -168,6 +168,36 @@ struct xml_convert::XmlTraits<tr2_AudioClipCapabilities> {
 };
 
 
+// MulticastAudioDecoderCapabilities 类型定义
+// 命名空间: http://www.onvif.org/ver20/media/wsdl
+// 源文件: media_v20.wsdl
+struct tr2_MulticastAudioDecoderCapabilities {
+    // Collection of any elements from namespace: ##any (processContents: lax)
+    std::vector<AnyElement> _any_;
+    // Indicates support for multicast audio decoder.
+    std::optional<bool> MulticastAudioDecoder;
+    // Indicates whether the SRTP is supported in MulticastAudioDecoder or not.
+    std::optional<bool> SRTP;
+    // Indicates whether the IPv6 is supported in MulticastAudioDecoder or not.
+    std::optional<bool> IPv6;
+    // Any attributes allowed (namespace: ##other, processContents: lax)
+    std::optional<std::map<std::string, std::string>> _attrs_;
+};
+
+
+// XmlTraits for tr2_MulticastAudioDecoderCapabilities
+template<>
+struct xml_convert::XmlTraits<tr2_MulticastAudioDecoderCapabilities> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("_any_", &tr2_MulticastAudioDecoderCapabilities::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element),
+        xml_convert::make_field_desc("MulticastAudioDecoder", &tr2_MulticastAudioDecoderCapabilities::MulticastAudioDecoder, nullptr, xml_convert::serialize_type::attribute),
+        xml_convert::make_field_desc("SRTP", &tr2_MulticastAudioDecoderCapabilities::SRTP, nullptr, xml_convert::serialize_type::attribute),
+        xml_convert::make_field_desc("IPv6", &tr2_MulticastAudioDecoderCapabilities::IPv6, nullptr, xml_convert::serialize_type::attribute),
+        xml_convert::make_field_desc("_attrs_", &tr2_MulticastAudioDecoderCapabilities::_attrs_, nullptr, xml_convert::serialize_type::attribute)
+    );
+};
+
+
 // Capabilities2 类型定义
 // 命名空间: http://www.onvif.org/ver20/media/wsdl
 // 源文件: media_v20.wsdl
@@ -180,6 +210,8 @@ struct tr2_Capabilities2 {
     std::optional<tr2_MediaSigningCapabilities> MediaSigningCapabilities;
     // Audio clip capabilities.
     std::optional<tr2_AudioClipCapabilities> AudioClipCapabilities;
+    // MulticastAudioDecoder capabilities.
+    std::optional<tr2_MulticastAudioDecoderCapabilities> MulticastAudioDecoderCapabilities;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     // Indicates if GetSnapshotUri is supported.
@@ -215,6 +247,7 @@ struct xml_convert::XmlTraits<tr2_Capabilities2> {
         xml_convert::make_field_desc("StreamingCapabilities", &tr2_Capabilities2::StreamingCapabilities, "tr2", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("MediaSigningCapabilities", &tr2_Capabilities2::MediaSigningCapabilities, "tr2", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("AudioClipCapabilities", &tr2_Capabilities2::AudioClipCapabilities, "tr2", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("MulticastAudioDecoderCapabilities", &tr2_Capabilities2::MulticastAudioDecoderCapabilities, "tr2", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("_any_", &tr2_Capabilities2::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element),
         xml_convert::make_field_desc("SnapshotUri", &tr2_Capabilities2::SnapshotUri, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("Rotation", &tr2_Capabilities2::Rotation, nullptr, xml_convert::serialize_type::attribute),
@@ -2762,6 +2795,100 @@ struct xml_convert::XmlTraits<tr2_GetPlayingAudioClipsResponse> {
         xml_convert::make_field_desc("PlayingAudioClips", &tr2_GetPlayingAudioClipsResponse::PlayingAudioClips, "tr2", xml_convert::serialize_type::full)
     );
 };
+
+
+// GetMulticastAudioDecoderConfigurations 类型定义
+// 命名空间: http://www.onvif.org/ver20/media/wsdl
+// 源文件: media_v20.wsdl
+struct tr2_GetMulticastAudioDecoderConfigurations {
+    // Unique token of the multicast audio decoder configuration. If not passed, device shall respond with all configurations.
+    std::optional<tt_ReferenceToken> ConfigurationToken;
+};
+
+
+// XmlTraits for tr2_GetMulticastAudioDecoderConfigurations
+template<>
+struct xml_convert::XmlTraits<tr2_GetMulticastAudioDecoderConfigurations> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("ConfigurationToken", &tr2_GetMulticastAudioDecoderConfigurations::ConfigurationToken, "tr2", xml_convert::serialize_type::full)
+    );
+};
+
+
+// GetMulticastAudioDecoderConfigurationsResponse 类型定义
+// 命名空间: http://www.onvif.org/ver20/media/wsdl
+// 源文件: media_v20.wsdl
+struct tr2_GetMulticastAudioDecoderConfigurationsResponse {
+    // This message contains the list of multicast audio decoder configurations.
+    std::vector<tt_MulticastAudioDecoderConfiguration> Configurations;
+};
+
+
+// XmlTraits for tr2_GetMulticastAudioDecoderConfigurationsResponse
+template<>
+struct xml_convert::XmlTraits<tr2_GetMulticastAudioDecoderConfigurationsResponse> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("Configurations", &tr2_GetMulticastAudioDecoderConfigurationsResponse::Configurations, "tr2", xml_convert::serialize_type::full)
+    );
+};
+
+
+// GetMulticastAudioDecoderConfigurationOptions 类型定义
+// 命名空间: http://www.onvif.org/ver20/media/wsdl
+// 源文件: media_v20.wsdl
+struct tr2_GetMulticastAudioDecoderConfigurationOptions {
+    // This response contains the available MulticastAudioDecoderConfigurationOptions. If a multicast audio decoder configuration is specified, the options shall concern that particular configuration.
+    std::optional<tt_ReferenceToken> ConfigurationToken;
+};
+
+
+// XmlTraits for tr2_GetMulticastAudioDecoderConfigurationOptions
+template<>
+struct xml_convert::XmlTraits<tr2_GetMulticastAudioDecoderConfigurationOptions> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("ConfigurationToken", &tr2_GetMulticastAudioDecoderConfigurationOptions::ConfigurationToken, "tr2", xml_convert::serialize_type::full)
+    );
+};
+
+
+// GetMulticastAudioDecoderConfigurationOptionsResponse 类型定义
+// 命名空间: http://www.onvif.org/ver20/media/wsdl
+// 源文件: media_v20.wsdl
+struct tr2_GetMulticastAudioDecoderConfigurationOptionsResponse {
+    std::vector<tt_MulticastAudioDecoderConfigurationOptions> Options;
+};
+
+
+// XmlTraits for tr2_GetMulticastAudioDecoderConfigurationOptionsResponse
+template<>
+struct xml_convert::XmlTraits<tr2_GetMulticastAudioDecoderConfigurationOptionsResponse> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("Options", &tr2_GetMulticastAudioDecoderConfigurationOptionsResponse::Options, "tr2", xml_convert::serialize_type::full)
+    );
+};
+
+
+// SetMulticastAudioDecoderConfiguration 类型定义
+// 命名空间: http://www.onvif.org/ver20/media/wsdl
+// 源文件: media_v20.wsdl
+struct tr2_SetMulticastAudioDecoderConfiguration {
+    // Contains the modified multicast audio decoder configuration. The configuration shall exist in the device.
+    tt_MulticastAudioDecoderConfiguration Configuration;
+};
+
+
+// XmlTraits for tr2_SetMulticastAudioDecoderConfiguration
+template<>
+struct xml_convert::XmlTraits<tr2_SetMulticastAudioDecoderConfiguration> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("Configuration", &tr2_SetMulticastAudioDecoderConfiguration::Configuration, "tr2", xml_convert::serialize_type::full)
+    );
+};
+
+
+// SetMulticastAudioDecoderConfigurationResponse 类型别名
+// 基础类型: tr2_SetConfigurationResponse
+using tr2_SetMulticastAudioDecoderConfigurationResponse = tr2_SetConfigurationResponse;
 
 
 } // namespace libonvif_client

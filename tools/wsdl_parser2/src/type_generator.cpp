@@ -373,7 +373,15 @@ std::string TypeGenerator::generate_struct(
     // 元数据已移至 Service 层，不再在类型中定义
 
     // 生成字段
+    int prev_choice_group = 0;
     for (const auto& field : type.fields) {
+        // Emit choice group separator comment
+        if (field.choice_group) {
+            oss << options_.indent << "// xs:choice group " << field.choice_group
+                    << " (mutually exclusive)\n";
+        }
+        prev_choice_group = field.choice_group;
+
         if (options_.generate_comments && !field.doc.empty()) {
             oss << generate_doc_comment(field.doc, 1);
         }

@@ -2317,6 +2317,11 @@ struct tt_Rotate {
     // Optional parameter to configure how much degree of clockwise rotation of image  for On mode. Omitting this parameter for On mode means 180 degree rotation.
     std::optional<int32_t> Degree;
     std::optional<tt_RotateExtension> Extension;
+    /*
+     * When enabled, the video will be flipped horizontally. If applied alongside rotation, the mirror effect shall be executed after the rotation. Additionally,
+     * when Mirror is enabled and Reverse=Auto is set in PTControlDirection or if the device doesn’t support Reverse in PTControlDirection, the device shall automatically adjust the pan direction.
+     */
+    std::optional<bool> Mirror;
     // Any attributes allowed (namespace: ##other, processContents: lax)
     std::optional<std::map<std::string, std::string>> _attrs_;
 };
@@ -2329,6 +2334,7 @@ struct xml_convert::XmlTraits<tt_Rotate> {
         xml_convert::make_field_desc("Mode", &tt_Rotate::Mode, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("Degree", &tt_Rotate::Degree, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("Extension", &tt_Rotate::Extension, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("Mirror", &tt_Rotate::Mirror, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("_attrs_", &tt_Rotate::_attrs_, nullptr, xml_convert::serialize_type::attribute)
     );
 };
@@ -4407,10 +4413,12 @@ struct tt_RotateOptions {
     std::optional<tt_IntItems> DegreeList;
     std::optional<tt_RotateOptionsExtension> Extension;
     /*
-     * Signals if a device requires a reboot after changing the rotation.
-     * If a device can handle rotation changes without rebooting this value shall be set to false.
+     * Signals if a device requires a reboot after changing the rotation or mirror.
+     * If a device can handle rotation changes or mirror changes without rebooting this value shall be set to false.
      */
     std::optional<bool> Reboot;
+    // Signals if video source mirroring is supported.
+    std::optional<bool> Mirror;
     // Any attributes allowed (namespace: ##other, processContents: lax)
     std::optional<std::map<std::string, std::string>> _attrs_;
 };
@@ -4424,6 +4432,7 @@ struct xml_convert::XmlTraits<tt_RotateOptions> {
         xml_convert::make_field_desc("DegreeList", &tt_RotateOptions::DegreeList, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("Extension", &tt_RotateOptions::Extension, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("Reboot", &tt_RotateOptions::Reboot, nullptr, xml_convert::serialize_type::attribute),
+        xml_convert::make_field_desc("Mirror", &tt_RotateOptions::Mirror, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("_attrs_", &tt_RotateOptions::_attrs_, nullptr, xml_convert::serialize_type::attribute)
     );
 };
@@ -6366,6 +6375,219 @@ struct xml_convert::XmlTraits<tt_AudioDecoderConfigurationOptions> {
         xml_convert::make_field_desc("G726DecOptions", &tt_AudioDecoderConfigurationOptions::G726DecOptions, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("Extension", &tt_AudioDecoderConfigurationOptions::Extension, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("_attrs_", &tt_AudioDecoderConfigurationOptions::_attrs_, nullptr, xml_convert::serialize_type::attribute)
+    );
+};
+
+
+// MulticastReceiverConfiguration 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: onvif_v10.xsd
+struct tt_MulticastReceiverConfiguration {
+    // The multicast address (if this address is set to 0 no multicast streaming is enabled)
+    tt_IPAddress Address;
+    // The RTP multicast destination port. A device may support RTCP. In this case the port value shall be even to allow the corresponding RTCP stream to be mapped to the next higher (odd) destination port number as defined in the RTSP specification.
+    int32_t Port {};
+    // In case of IPv6 the TTL value is assumed as the hop limit. Note that for IPV6 and administratively scoped IPv4 multicast the primary use for hop limit / TTL is to prevent packets from (endlessly) circulating and not limiting scope. In these cases the address contains the scope.
+    int32_t TTL {};
+    // Unique identifier of the network interface on the device. If not specified, all available interfaces will be used for listening.
+    std::vector<tt_ReferenceToken> InterfaceToken;
+    // When a source-specific multicast address is configured, the device will process multicast data only from the specified source, in accordance with SSM principles defined in RFC 4607.
+    std::optional<tt_IPAddress> SourceSpecificMulticast;
+    // Collection of any elements from namespace: ##any (processContents: lax)
+    std::vector<AnyElement> _any_;
+    // Any attributes allowed (namespace: ##other, processContents: lax)
+    std::optional<std::map<std::string, std::string>> _attrs_;
+};
+
+
+// XmlTraits for tt_MulticastReceiverConfiguration
+template<>
+struct xml_convert::XmlTraits<tt_MulticastReceiverConfiguration> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("Address", &tt_MulticastReceiverConfiguration::Address, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("Port", &tt_MulticastReceiverConfiguration::Port, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("TTL", &tt_MulticastReceiverConfiguration::TTL, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("InterfaceToken", &tt_MulticastReceiverConfiguration::InterfaceToken, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("SourceSpecificMulticast", &tt_MulticastReceiverConfiguration::SourceSpecificMulticast, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("_any_", &tt_MulticastReceiverConfiguration::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element),
+        xml_convert::make_field_desc("_attrs_", &tt_MulticastReceiverConfiguration::_attrs_, nullptr, xml_convert::serialize_type::attribute)
+    );
+};
+
+
+// SRTPPreShared 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: onvif_v10.xsd
+struct tt_SRTPPreShared {
+    /*
+     * An optional SRTP Pre-Shared Key (PSK) represented as a hexadecimal string.
+     * This includes both the SRTP master key, followed by the master salt.
+     * The sizes of the key and salt depend on the specified SRTPCryptoPolicy.
+     * When this element is specified, RTP packets shall be encrypted.
+     * The SRTPPSK shall never be returned on a get method.
+     */
+    std::string SRTPPSK;
+    /*
+     * Specifies the cryptographic algorithm when using SRTP,
+     * selecting from predefined values provided in the GetMulticastAudioDecoderConfigurationOptions response.
+     */
+    std::string SecureStreamingProtocolAlgorithm;
+    /*
+     * The RTP header extension ID (ExtMapID) used to identify the ROC extension, as defined in RFC 8285.
+     * Valid values are 1 to 14 for one-byte header extensions.
+     */
+    int32_t ROCExtMapID {};
+    // Collection of any elements from namespace: ##any (processContents: lax)
+    std::vector<AnyElement> _any_;
+    // Any attributes allowed (namespace: ##other, processContents: lax)
+    std::optional<std::map<std::string, std::string>> _attrs_;
+};
+
+
+// XmlTraits for tt_SRTPPreShared
+template<>
+struct xml_convert::XmlTraits<tt_SRTPPreShared> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("SRTPPSK", &tt_SRTPPreShared::SRTPPSK, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("SecureStreamingProtocolAlgorithm", &tt_SRTPPreShared::SecureStreamingProtocolAlgorithm, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("ROCExtMapID", &tt_SRTPPreShared::ROCExtMapID, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("_any_", &tt_SRTPPreShared::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element),
+        xml_convert::make_field_desc("_attrs_", &tt_SRTPPreShared::_attrs_, nullptr, xml_convert::serialize_type::attribute)
+    );
+};
+
+
+// MulticastAudioDecoderConfiguration 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: onvif_v10.xsd
+struct tt_MulticastAudioDecoderConfiguration : public tt_ConfigurationEntity {
+    // Indicates whether the Multicast Audio Decoder is enabled or disabled.
+    bool Enable {};
+    // Token of the physical Audio output. This element is optional and can occur multiple times.
+    std::vector<tt_ReferenceToken> AudioOutputToken;
+    // Specifies the encoding type according to IANA media types.
+    std::string Encoding;
+    // The bitrate of the audio stream in bits per second.
+    int32_t Bitrate {};
+    // The sampling rate of the audio stream in kHz.
+    int32_t SamplingRate {};
+    // Contains configuration details for multicast settings.
+    tt_MulticastReceiverConfiguration Multicast;
+    /*
+     * Defines the RTP payload type used for the audio stream.
+     * To ensure compatibility, it is recommended to use dynamic payload types (96 and above), as specified in RFC 3551.
+     * Standard payload types (0-95) should only be used for predefined audio formats matching the audio encoding as defined in
+     * IANA RTP Payload Types,
+     * as using them for non-standard media may lead to unexpected errors or interoperability issues.
+     */
+    int32_t RTPPayloadType {};
+    /*
+     * Indicates the priority level when multiple configurations are active.
+     * A higher value signifies a higher priority. If several configurations have the same priority value the order between those configurations is undefined.
+     */
+    int32_t Priority {};
+    /*
+     * Optional media format parameters as specified in SDP, such as:
+     * a=fmtp:101 stereo=1; sprop-stereo=1.
+     */
+    std::optional<std::string> MediaFormatParameters;
+    // Optional configuration parameters for SRTP pre-shared key usage, applicable when SRTP is supported. When this configuration is present, RTP packets shall be encrypted.
+    std::optional<tt_SRTPPreShared> SRTPPreSharedParameters;
+    // Collection of any elements from namespace: ##any (processContents: lax)
+    std::vector<AnyElement> _any_;
+    // Any attributes allowed (namespace: ##other, processContents: lax)
+    std::optional<std::map<std::string, std::string>> _attrs_;
+};
+
+
+// XmlTraits for tt_MulticastAudioDecoderConfiguration
+template<>
+struct xml_convert::XmlTraits<tt_MulticastAudioDecoderConfiguration> {
+    static constexpr auto fields = std::tuple_cat(xml_convert::XmlTraits<tt_ConfigurationEntity>::fields, std::make_tuple(
+        xml_convert::make_field_desc("Enable", &tt_MulticastAudioDecoderConfiguration::Enable, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("AudioOutputToken", &tt_MulticastAudioDecoderConfiguration::AudioOutputToken, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("Encoding", &tt_MulticastAudioDecoderConfiguration::Encoding, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("Bitrate", &tt_MulticastAudioDecoderConfiguration::Bitrate, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("SamplingRate", &tt_MulticastAudioDecoderConfiguration::SamplingRate, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("Multicast", &tt_MulticastAudioDecoderConfiguration::Multicast, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("RTPPayloadType", &tt_MulticastAudioDecoderConfiguration::RTPPayloadType, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("Priority", &tt_MulticastAudioDecoderConfiguration::Priority, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("MediaFormatParameters", &tt_MulticastAudioDecoderConfiguration::MediaFormatParameters, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("SRTPPreSharedParameters", &tt_MulticastAudioDecoderConfiguration::SRTPPreSharedParameters, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("_any_", &tt_MulticastAudioDecoderConfiguration::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element),
+        xml_convert::make_field_desc("_attrs_", &tt_MulticastAudioDecoderConfiguration::_attrs_, nullptr, xml_convert::serialize_type::attribute))
+    );
+};
+
+
+// AudioDecoder2Options 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: onvif_v10.xsd
+struct tt_AudioDecoder2Options {
+    // Audio Media Subtype for the audio format. For definitions see tt:AudioEncodingMimeNames and  IANA Media Types.
+    std::string Encoding;
+    // List of supported bitrates in kbps for the specified Encoding
+    tt_IntItems BitrateList;
+    // List of supported Sample Rates in kHz for the specified Encoding
+    tt_IntItems SampleRateList;
+    /*
+     * Optional element for specifying the RTP payload type,
+     * particularly when it is fixed for a specific audio encoding as defined in IANA RTP Payload Types.
+     */
+    std::optional<int32_t> RTPPayloadType;
+    // Collection of any elements from namespace: ##any (processContents: lax)
+    std::vector<AnyElement> _any_;
+    // Any attributes allowed (namespace: ##other, processContents: lax)
+    std::optional<std::map<std::string, std::string>> _attrs_;
+};
+
+
+// XmlTraits for tt_AudioDecoder2Options
+template<>
+struct xml_convert::XmlTraits<tt_AudioDecoder2Options> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("Encoding", &tt_AudioDecoder2Options::Encoding, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("BitrateList", &tt_AudioDecoder2Options::BitrateList, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("SampleRateList", &tt_AudioDecoder2Options::SampleRateList, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("RTPPayloadType", &tt_AudioDecoder2Options::RTPPayloadType, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("_any_", &tt_AudioDecoder2Options::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element),
+        xml_convert::make_field_desc("_attrs_", &tt_AudioDecoder2Options::_attrs_, nullptr, xml_convert::serialize_type::attribute)
+    );
+};
+
+
+// MulticastAudioDecoderConfigurationOptions 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: onvif_v10.xsd
+struct tt_MulticastAudioDecoderConfigurationOptions {
+    // Supported encoding options for the multicast audio decoder.
+    tt_AudioDecoder2Options EncodingOptions;
+    // Specifies the priority range as an integer. This indicates the priority level for audio configuration.
+    tt_IntRange PriorityRange;
+    /*
+     * An optional parameter specifies the list of supported cryptographic algorithms when SRTP support is signaled as 'true' in the GetServiceCapabilitiesResponse.
+     * Refer to tt:SrtpSecurityAlgorithms for the acceptable values.
+     */
+    std::optional<tt_StringList> SecureStreamingProtocolAlgorithms;
+    // Optional list of physical Audio output tokens. This element is used when only certain audio outputs can be configured for this token.
+    std::optional<tt_StringList> AudioOutputTokens;
+    // Collection of any elements from namespace: ##any (processContents: lax)
+    std::vector<AnyElement> _any_;
+    // Any attributes allowed (namespace: ##other, processContents: lax)
+    std::optional<std::map<std::string, std::string>> _attrs_;
+};
+
+
+// XmlTraits for tt_MulticastAudioDecoderConfigurationOptions
+template<>
+struct xml_convert::XmlTraits<tt_MulticastAudioDecoderConfigurationOptions> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("EncodingOptions", &tt_MulticastAudioDecoderConfigurationOptions::EncodingOptions, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("PriorityRange", &tt_MulticastAudioDecoderConfigurationOptions::PriorityRange, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("SecureStreamingProtocolAlgorithms", &tt_MulticastAudioDecoderConfigurationOptions::SecureStreamingProtocolAlgorithms, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("AudioOutputTokens", &tt_MulticastAudioDecoderConfigurationOptions::AudioOutputTokens, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("_any_", &tt_MulticastAudioDecoderConfigurationOptions::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element),
+        xml_convert::make_field_desc("_attrs_", &tt_MulticastAudioDecoderConfigurationOptions::_attrs_, nullptr, xml_convert::serialize_type::attribute)
     );
 };
 
@@ -10866,10 +11088,36 @@ struct xml_convert::XmlAttributeAdapter<tt_UserLevel> {
 };
 
 
+// UserRole 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: onvif_v10.xsd
+struct tt_UserRole {
+    // Name of the editable user level.
+    std::string Name;
+    // Names of the permitted function for the editable user level. The names must be prepended by the namespace prefix and colon.
+    tt_StringList Functions;
+    // Any attributes allowed (namespace: ##other, processContents: lax)
+    std::optional<std::map<std::string, std::string>> _attrs_;
+};
+
+
+// XmlTraits for tt_UserRole
+template<>
+struct xml_convert::XmlTraits<tt_UserRole> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("Name", &tt_UserRole::Name, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("Functions", &tt_UserRole::Functions, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("_attrs_", &tt_UserRole::_attrs_, nullptr, xml_convert::serialize_type::attribute)
+    );
+};
+
+
 // UserExtension 类型定义
 // 命名空间: http://www.onvif.org/ver10/schema
 // 源文件: onvif_v10.xsd
 struct tt_UserExtension {
+    // The names of the roles assigned to the user.
+    tt_StringList Roles;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
 };
@@ -10879,6 +11127,7 @@ struct tt_UserExtension {
 template<>
 struct xml_convert::XmlTraits<tt_UserExtension> {
     static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("Roles", &tt_UserExtension::Roles, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("_any_", &tt_UserExtension::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element)
     );
 };
@@ -12455,10 +12704,39 @@ struct xml_convert::XmlAttributeAdapter<tt_PTZPresetTourDirection> {
 };
 
 
+// PTZPresetTourTypeExtension 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: onvif_v10.xsd
+struct tt_PTZPresetTourTypeExtension {
+    // Collection of any elements from namespace: ##targetNamespace (processContents: lax)
+    std::vector<AnyElement> _any_;
+};
+
+
+// XmlTraits for tt_PTZPresetTourTypeExtension
+template<>
+struct xml_convert::XmlTraits<tt_PTZPresetTourTypeExtension> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("_any_", &tt_PTZPresetTourTypeExtension::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element)
+    );
+};
+
+
 // PTZPresetTourPresetDetail 类型定义
 // 命名空间: http://www.onvif.org/ver10/schema
 // 源文件: onvif_v10.xsd
 struct tt_PTZPresetTourPresetDetail {
+    // xs:choice group 1 (mutually exclusive)
+    // Option to specify the preset position with Preset Token defined in advance.
+    std::optional<tt_ReferenceToken> PresetToken;
+    // xs:choice group 1 (mutually exclusive)
+    // Option to specify the preset position with the home position of this PTZ Node. "False" to this parameter shall be treated as an invalid argument.
+    std::optional<bool> Home;
+    // xs:choice group 1 (mutually exclusive)
+    // Option to specify the preset position with vector of PTZ node directly.
+    std::optional<tt_PTZVector> PTZPosition;
+    // xs:choice group 1 (mutually exclusive)
+    std::optional<tt_PTZPresetTourTypeExtension> TypeExtension;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     // Any attributes allowed (namespace: ##other, processContents: lax)
@@ -12470,6 +12748,10 @@ struct tt_PTZPresetTourPresetDetail {
 template<>
 struct xml_convert::XmlTraits<tt_PTZPresetTourPresetDetail> {
     static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("PresetToken", &tt_PTZPresetTourPresetDetail::PresetToken, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("Home", &tt_PTZPresetTourPresetDetail::Home, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("PTZPosition", &tt_PTZPresetTourPresetDetail::PTZPosition, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("TypeExtension", &tt_PTZPresetTourPresetDetail::TypeExtension, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("_any_", &tt_PTZPresetTourPresetDetail::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element),
         xml_convert::make_field_desc("_attrs_", &tt_PTZPresetTourPresetDetail::_attrs_, nullptr, xml_convert::serialize_type::attribute)
     );
@@ -12669,24 +12951,6 @@ struct xml_convert::XmlTraits<tt_PresetTour> {
         xml_convert::make_field_desc("Extension", &tt_PresetTour::Extension, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("token", &tt_PresetTour::token, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("_attrs_", &tt_PresetTour::_attrs_, nullptr, xml_convert::serialize_type::attribute)
-    );
-};
-
-
-// PTZPresetTourTypeExtension 类型定义
-// 命名空间: http://www.onvif.org/ver10/schema
-// 源文件: onvif_v10.xsd
-struct tt_PTZPresetTourTypeExtension {
-    // Collection of any elements from namespace: ##targetNamespace (processContents: lax)
-    std::vector<AnyElement> _any_;
-};
-
-
-// XmlTraits for tt_PTZPresetTourTypeExtension
-template<>
-struct xml_convert::XmlTraits<tt_PTZPresetTourTypeExtension> {
-    static constexpr auto fields = std::make_tuple(
-        xml_convert::make_field_desc("_any_", &tt_PTZPresetTourTypeExtension::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element)
     );
 };
 
@@ -16667,14 +16931,42 @@ struct xml_convert::XmlAttributeAdapter<tt_EncryptionMode> {
 };
 
 
+// AsymmetricEncryption 类型定义
+// 命名空间: http://www.onvif.org/ver10/schema
+// 源文件: onvif_v10.xsd
+struct tt_AsymmetricEncryption {
+    // List of certificates used to encrypt the symmetric key for the PSSH box.
+    std::vector<std::string> CertificateID;
+    /*
+     * Frequency at which the device shall generate a new key to encrypt a new segment.
+     * If not specified, key rotation is disabled.
+     * KeyRotationDuration must be a positive duration value.
+     */
+    std::optional<std::string> KeyRotationDuration;
+    // Collection of any elements from namespace: ##any (processContents: lax)
+    std::vector<AnyElement> _any_;
+};
+
+
+// XmlTraits for tt_AsymmetricEncryption
+template<>
+struct xml_convert::XmlTraits<tt_AsymmetricEncryption> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("CertificateID", &tt_AsymmetricEncryption::CertificateID, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("KeyRotationDuration", &tt_AsymmetricEncryption::KeyRotationDuration, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("_any_", &tt_AsymmetricEncryption::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element)
+    );
+};
+
+
 // RecordingEncryption 类型定义
 // 命名空间: http://www.onvif.org/ver10/schema
 // 源文件: onvif_v10.xsd
 struct tt_RecordingEncryption {
-    // Key ID of the associated key for encryption.
-    std::string KID;
+    // Key ID of the associated key for encryption. This parameter is ignored when AsymmetricEncryption is configured.
+    std::optional<std::string> KID;
     /*
-     * Key for encrypting content.
+     * Key for encrypting content. This parameter is ignored when AsymmetricEncryption is configured.
      * The device shall not include this parameter when reading.
      */
     std::optional<std::string> Key;
@@ -16684,6 +16976,7 @@ struct tt_RecordingEncryption {
      * Each track shall only be contained in one encryption configuration.
      */
     std::vector<std::string> Track;
+    std::optional<tt_AsymmetricEncryption> AsymmetricEncryption;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     /*
@@ -16703,6 +16996,7 @@ struct xml_convert::XmlTraits<tt_RecordingEncryption> {
         xml_convert::make_field_desc("KID", &tt_RecordingEncryption::KID, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("Key", &tt_RecordingEncryption::Key, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("Track", &tt_RecordingEncryption::Track, "tt", xml_convert::serialize_type::full),
+        xml_convert::make_field_desc("AsymmetricEncryption", &tt_RecordingEncryption::AsymmetricEncryption, "tt", xml_convert::serialize_type::full),
         xml_convert::make_field_desc("_any_", &tt_RecordingEncryption::_any_, nullptr, xml_convert::serialize_type::full | xml_convert::serialize_type::any_element),
         xml_convert::make_field_desc("Mode", &tt_RecordingEncryption::Mode, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("_attrs_", &tt_RecordingEncryption::_attrs_, nullptr, xml_convert::serialize_type::attribute)

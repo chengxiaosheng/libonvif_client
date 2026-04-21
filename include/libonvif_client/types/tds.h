@@ -138,6 +138,8 @@ struct tds_SecurityCapabilities {
     std::optional<int32_t> MaxPasswordHistory;
     // Supported hashing algorithms as part of HTTP and RTSP Digest authentication.Example: MD5,SHA-256
     std::optional<tt_StringList> HashingAlgorithms;
+    // Whenever set to an integer greater than zero, it signals that the device supports editable user roles. It indicates the maximum number of editable user roles.
+    std::optional<int32_t> MaxUserRoles;
     // Any attributes allowed (namespace: ##other, processContents: lax)
     std::optional<std::map<std::string, std::string>> _attrs_;
 };
@@ -169,6 +171,7 @@ struct xml_convert::XmlTraits<tds_SecurityCapabilities> {
         xml_convert::make_field_desc("SecurityPolicies", &tds_SecurityCapabilities::SecurityPolicies, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("MaxPasswordHistory", &tds_SecurityCapabilities::MaxPasswordHistory, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("HashingAlgorithms", &tds_SecurityCapabilities::HashingAlgorithms, nullptr, xml_convert::serialize_type::attribute),
+        xml_convert::make_field_desc("MaxUserRoles", &tds_SecurityCapabilities::MaxUserRoles, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("_attrs_", &tds_SecurityCapabilities::_attrs_, nullptr, xml_convert::serialize_type::attribute)
     );
 };
@@ -190,6 +193,8 @@ struct tds_SystemCapabilities {
     std::optional<bool> SystemLogging;
     // Indicates support for firmware upgrade through MTOM.
     std::optional<bool> FirmwareUpgrade;
+    // Indicates support for firmware upgrade through the cloud.
+    std::optional<bool> CloudFirmwareUpgrade;
     // Indicates support for firmware upgrade through HTTP.
     std::optional<bool> HttpFirmwareUpgrade;
     // Indicates support for system backup through HTTP.
@@ -235,6 +240,7 @@ struct xml_convert::XmlTraits<tds_SystemCapabilities> {
         xml_convert::make_field_desc("SystemBackup", &tds_SystemCapabilities::SystemBackup, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("SystemLogging", &tds_SystemCapabilities::SystemLogging, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("FirmwareUpgrade", &tds_SystemCapabilities::FirmwareUpgrade, nullptr, xml_convert::serialize_type::attribute),
+        xml_convert::make_field_desc("CloudFirmwareUpgrade", &tds_SystemCapabilities::CloudFirmwareUpgrade, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("HttpFirmwareUpgrade", &tds_SystemCapabilities::HttpFirmwareUpgrade, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("HttpSystemBackup", &tds_SystemCapabilities::HttpSystemBackup, nullptr, xml_convert::serialize_type::attribute),
         xml_convert::make_field_desc("HttpSystemLogging", &tds_SystemCapabilities::HttpSystemLogging, nullptr, xml_convert::serialize_type::attribute),
@@ -1543,6 +1549,106 @@ struct tds_SetUserResponse {
 // XmlTraits for tds_SetUserResponse
 template<>
 struct xml_convert::XmlTraits<tds_SetUserResponse> {
+    static constexpr auto fields = std::make_tuple(
+
+    );
+};
+
+
+// GetUserRoles 类型定义
+// 命名空间: http://www.onvif.org/ver10/device/wsdl
+// 源文件: devicemgmt_v10.wsdl
+struct tds_GetUserRoles {
+    std::optional<std::string> UserRole;
+};
+
+
+// XmlTraits for tds_GetUserRoles
+template<>
+struct xml_convert::XmlTraits<tds_GetUserRoles> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("UserRole", &tds_GetUserRoles::UserRole, "tds", xml_convert::serialize_type::full)
+    );
+};
+
+
+// GetUserRolesResponse 类型定义
+// 命名空间: http://www.onvif.org/ver10/device/wsdl
+// 源文件: devicemgmt_v10.wsdl
+struct tds_GetUserRolesResponse {
+    std::vector<tt_UserRole> UserRole;
+};
+
+
+// XmlTraits for tds_GetUserRolesResponse
+template<>
+struct xml_convert::XmlTraits<tds_GetUserRolesResponse> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("UserRole", &tds_GetUserRolesResponse::UserRole, "tds", xml_convert::serialize_type::full)
+    );
+};
+
+
+// SetUserRole 类型定义
+// 命名空间: http://www.onvif.org/ver10/device/wsdl
+// 源文件: devicemgmt_v10.wsdl
+struct tds_SetUserRole {
+    tt_UserRole UserRole;
+};
+
+
+// XmlTraits for tds_SetUserRole
+template<>
+struct xml_convert::XmlTraits<tds_SetUserRole> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("UserRole", &tds_SetUserRole::UserRole, "tds", xml_convert::serialize_type::full)
+    );
+};
+
+
+// SetUserRoleResponse 类型定义
+// 命名空间: http://www.onvif.org/ver10/device/wsdl
+// 源文件: devicemgmt_v10.wsdl
+struct tds_SetUserRoleResponse {
+};
+
+
+// XmlTraits for tds_SetUserRoleResponse
+template<>
+struct xml_convert::XmlTraits<tds_SetUserRoleResponse> {
+    static constexpr auto fields = std::make_tuple(
+
+    );
+};
+
+
+// DeleteUserRole 类型定义
+// 命名空间: http://www.onvif.org/ver10/device/wsdl
+// 源文件: devicemgmt_v10.wsdl
+struct tds_DeleteUserRole {
+    std::string UserRole;
+};
+
+
+// XmlTraits for tds_DeleteUserRole
+template<>
+struct xml_convert::XmlTraits<tds_DeleteUserRole> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("UserRole", &tds_DeleteUserRole::UserRole, "tds", xml_convert::serialize_type::full)
+    );
+};
+
+
+// DeleteUserRoleResponse 类型定义
+// 命名空间: http://www.onvif.org/ver10/device/wsdl
+// 源文件: devicemgmt_v10.wsdl
+struct tds_DeleteUserRoleResponse {
+};
+
+
+// XmlTraits for tds_DeleteUserRoleResponse
+template<>
+struct xml_convert::XmlTraits<tds_DeleteUserRoleResponse> {
     static constexpr auto fields = std::make_tuple(
 
     );
@@ -3697,6 +3803,40 @@ struct xml_convert::XmlTraits<tds_StartFirmwareUpgradeResponse> {
 };
 
 
+// UpgradeFirmware 类型定义
+// 命名空间: http://www.onvif.org/ver10/device/wsdl
+// 源文件: devicemgmt_v10.wsdl
+struct tds_UpgradeFirmware {
+    std::string Version;
+};
+
+
+// XmlTraits for tds_UpgradeFirmware
+template<>
+struct xml_convert::XmlTraits<tds_UpgradeFirmware> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("Version", &tds_UpgradeFirmware::Version, "tds", xml_convert::serialize_type::full)
+    );
+};
+
+
+// UpgradeFirmwareResponse 类型定义
+// 命名空间: http://www.onvif.org/ver10/device/wsdl
+// 源文件: devicemgmt_v10.wsdl
+struct tds_UpgradeFirmwareResponse {
+    std::string ExpectedDownTime;
+};
+
+
+// XmlTraits for tds_UpgradeFirmwareResponse
+template<>
+struct xml_convert::XmlTraits<tds_UpgradeFirmwareResponse> {
+    static constexpr auto fields = std::make_tuple(
+        xml_convert::make_field_desc("ExpectedDownTime", &tds_UpgradeFirmwareResponse::ExpectedDownTime, "tds", xml_convert::serialize_type::full)
+    );
+};
+
+
 // StartSystemRestore 类型定义
 // 命名空间: http://www.onvif.org/ver10/device/wsdl
 // 源文件: devicemgmt_v10.wsdl
@@ -3772,10 +3912,10 @@ struct xml_convert::XmlTraits<tds_SetHashingAlgorithmResponse> {
 struct tds_UserCredential {
     // User name
     std::string UserName;
-    // optional password
+    // optional password, device shall not return the credentials (password) in the reply.
     std::optional<std::string> Password;
     std::optional<tds_Extension> Extension;
-    // optional access token
+    // optional access token, device shall not return the credentials (token) in the reply.
     std::optional<std::string> Token;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
