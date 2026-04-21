@@ -2324,7 +2324,7 @@ struct tds_SetDynamicDNS {
     // DNS name.
     std::optional<tt_DNSName> Name;
     // DNS record time to live.
-    std::optional<std::string> TTL;
+    std::optional<my_Duration> TTL;
 };
 
 
@@ -3787,8 +3787,8 @@ struct xml_convert::XmlTraits<tds_StartFirmwareUpgrade> {
 // 源文件: devicemgmt_v10.wsdl
 struct tds_StartFirmwareUpgradeResponse {
     std::string UploadUri;
-    std::string UploadDelay;
-    std::string ExpectedDownTime;
+    my_Duration UploadDelay;
+    my_Duration ExpectedDownTime;
 };
 
 
@@ -3824,7 +3824,7 @@ struct xml_convert::XmlTraits<tds_UpgradeFirmware> {
 // 命名空间: http://www.onvif.org/ver10/device/wsdl
 // 源文件: devicemgmt_v10.wsdl
 struct tds_UpgradeFirmwareResponse {
-    std::string ExpectedDownTime;
+    my_Duration ExpectedDownTime;
 };
 
 
@@ -3858,7 +3858,7 @@ struct xml_convert::XmlTraits<tds_StartSystemRestore> {
 // 源文件: devicemgmt_v10.wsdl
 struct tds_StartSystemRestoreResponse {
     std::string UploadUri;
-    std::string ExpectedDownTime;
+    my_Duration ExpectedDownTime;
 };
 
 

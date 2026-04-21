@@ -185,7 +185,7 @@ struct xml_convert::XmlTraits<tev_CreatePullPointSubscriptionResponse> {
 // 源文件: event_v10.wsdl
 struct tev_PullMessages {
     // Maximum time to block until this method returns.
-    std::string Timeout;
+    my_Duration Timeout;
     // Upper limit for the number of messages to return at once. A server implementation may decide to return less messages.
     int32_t MessageLimit {};
     // Collection of any elements from namespace: ##other (processContents: strict)
@@ -233,7 +233,7 @@ struct xml_convert::XmlTraits<tev_PullMessagesResponse> {
 // 源文件: event_v10.wsdl
 struct tev_PullMessagesFaultResponse {
     // Maximum timeout supported by the device.
-    std::string MaxTimeout;
+    my_Duration MaxTimeout;
     // Maximum message limit supported by the device.
     int32_t MaxMessageLimit {};
     // Collection of any elements from namespace: ##other (processContents: strict)

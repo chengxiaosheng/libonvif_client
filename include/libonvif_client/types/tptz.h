@@ -621,7 +621,7 @@ struct tptz_ContinuousMove {
     // A Velocity vector specifying the velocity of pan, tilt and zoom.
     tt_PTZSpeed Velocity;
     // An optional Timeout parameter.
-    std::optional<std::string> Timeout;
+    std::optional<my_Duration> Timeout;
 };
 
 

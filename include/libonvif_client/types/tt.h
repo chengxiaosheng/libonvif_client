@@ -130,8 +130,8 @@ struct xml_convert::XmlTraits<tt_FloatRange> {
 // 命名空间: http://www.onvif.org/ver10/schema
 // 源文件: onvif_v10.xsd
 struct tt_DurationRange {
-    std::string Min;
-    std::string Max;
+    my_Duration Min;
+    my_Duration Max;
 };
 
 
@@ -1806,7 +1806,7 @@ struct tt_IrCutFilterAutoAdjustment {
     // Adjusts boundary exposure level for toggling Ir cut filter to on/off specified with unitless normalized value from +1.0 to -1.0. Zero is default and -1.0 is the darkest adjustment (Unitless).
     std::optional<float> BoundaryOffset;
     // Delay time of toggling Ir cut filter to on/off after crossing of the boundary exposure levels.
-    std::optional<std::string> ResponseTime;
+    std::optional<my_Duration> ResponseTime;
     std::optional<tt_IrCutFilterAutoAdjustmentExtension> Extension;
     // Any attributes allowed (namespace: ##other, processContents: lax)
     std::optional<std::map<std::string, std::string>> _attrs_;
@@ -3193,7 +3193,7 @@ struct tt_VideoEncoderConfiguration : public tt_ConfigurationEntity {
     // Defines the multicast settings that could be used for video streaming.
     tt_MulticastConfiguration Multicast;
     // The rtsp session timeout for the related video stream
-    std::string SessionTimeout;
+    my_Duration SessionTimeout;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     /*
@@ -3336,7 +3336,7 @@ struct tt_AudioEncoderConfiguration : public tt_ConfigurationEntity {
     // Defines the multicast settings that could be used for video streaming.
     tt_MulticastConfiguration Multicast;
     // The rtsp session timeout for the related audio stream
-    std::string SessionTimeout;
+    my_Duration SessionTimeout;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     // Any attributes allowed (namespace: ##other, processContents: lax)
@@ -4030,7 +4030,7 @@ struct tt_PTZConfiguration : public tt_ConfigurationEntity {
     // If the PTZ Node supports absolute or relative PTZ movements, it shall specify corresponding default Pan/Tilt and Zoom speeds.
     std::optional<tt_PTZSpeed> DefaultPTZSpeed;
     // If the PTZ Node supports continuous movements, it shall specify a default timeout, after which the movement stops.
-    std::optional<std::string> DefaultPTZTimeout;
+    std::optional<my_Duration> DefaultPTZTimeout;
     // The Pan/Tilt limits element should be present for a PTZ Node that supports an absolute Pan/Tilt. If the element is present it signals the support for configurable Pan/Tilt limits. If limits are enabled, the Pan/Tilt movements shall always stay within the specified range. The Pan/Tilt limits are disabled by setting the limits to –INF or +INF.
     std::optional<tt_PanTiltLimits> PanTiltLimits;
     // The Zoom limits element should be present for a PTZ Node that supports absolute zoom. If the element is present it signals the supports for configurable Zoom limits. If limits are enabled the zoom movements shall always stay within the specified range. The Zoom limits are disabled by settings the limits to -INF and +INF.
@@ -4178,7 +4178,7 @@ struct tt_MetadataConfiguration : public tt_ConfigurationEntity {
     // Defines the multicast settings that could be used for video streaming.
     tt_MulticastConfiguration Multicast;
     // The rtsp session timeout for the related audio stream (when using Media2 Service, this value is deprecated and ignored)
-    std::string SessionTimeout;
+    my_Duration SessionTimeout;
     // Collection of any elements from namespace: ##other (processContents: lax)
     std::vector<AnyElement> _any_;
     /*
@@ -6844,7 +6844,7 @@ struct tt_MediaUri {
     // Indicates if the Uri is invalid after a reboot of the device. The value shall be set to "false".
     bool InvalidAfterReboot {};
     // Duration how long the Uri is valid. This parameter shall be set to PT0S to indicate that this stream URI is indefinitely valid even if the profile changes
-    std::string Timeout;
+    my_Duration Timeout;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     // Any attributes allowed (namespace: ##other, processContents: lax)
@@ -8736,7 +8736,7 @@ struct tt_DynamicDNSInformation {
     // DNS name.
     std::optional<tt_DNSName> Name;
     // Time to live.
-    std::optional<std::string> TTL;
+    std::optional<my_Duration> TTL;
     std::optional<tt_DynamicDNSInformationExtension> Extension;
     // Any attributes allowed (namespace: ##other, processContents: lax)
     std::optional<std::map<std::string, std::string>> _attrs_;
@@ -11817,7 +11817,7 @@ struct tt_RelayOutputSettings {
      */
     tt_RelayMode Mode;
     // Time after which the relay returns to its idle state if it is in monostable mode. If the Mode field is set to bistable mode the value of the parameter can be ignored.
-    std::string DelayTime;
+    my_Duration DelayTime;
     /*
      * 'open' or 'closed'
      *
@@ -12785,7 +12785,7 @@ struct tt_PTZPresetTourSpot {
     // Optional parameter to specify Pan/Tilt and Zoom speed on moving toward this tour spot.
     std::optional<tt_PTZSpeed> Speed;
     // Optional parameter to specify time duration of staying on this tour sport.
-    std::optional<std::string> StayTime;
+    std::optional<my_Duration> StayTime;
     std::optional<tt_PTZPresetTourSpotExtension> Extension;
     // Any attributes allowed (namespace: ##other, processContents: lax)
     std::optional<std::map<std::string, std::string>> _attrs_;
@@ -12874,7 +12874,7 @@ struct tt_PTZPresetTourStartingCondition {
     // Optional parameter to specify how many times the preset tour is recurred.
     std::optional<int32_t> RecurringTime;
     // Optional parameter to specify how long time duration the preset tour is recurred.
-    std::optional<std::string> RecurringDuration;
+    std::optional<my_Duration> RecurringDuration;
     // Optional parameter to choose which direction the preset tour goes. Forward shall be chosen in case it is omitted.
     std::optional<tt_PTZPresetTourDirection> Direction;
     std::optional<tt_PTZPresetTourStartingConditionExtension> Extension;
@@ -16942,7 +16942,7 @@ struct tt_AsymmetricEncryption {
      * If not specified, key rotation is disabled.
      * KeyRotationDuration must be a positive duration value.
      */
-    std::optional<std::string> KeyRotationDuration;
+    std::optional<my_Duration> KeyRotationDuration;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
 };
@@ -17009,9 +17009,9 @@ struct xml_convert::XmlTraits<tt_RecordingEncryption> {
 // 源文件: onvif_v10.xsd
 struct tt_SegmentDurationOverride {
     // Current value of the segment duration.
-    std::string Duration;
+    my_Duration Duration;
     // Time remaining until the override expires.
-    std::string Expiration;
+    my_Duration Expiration;
 };
 
 
@@ -17041,9 +17041,9 @@ struct tt_RecordingTargetConfiguration {
     // Path postfix to be inserted in the object key.
     std::optional<std::string> Postfix;
     // Maximum duration of a span.
-    std::optional<std::string> SpanDuration;
+    std::optional<my_Duration> SpanDuration;
     // Maximum duration of a segment.
-    std::string SegmentDuration;
+    my_Duration SegmentDuration;
     /*
      * Optional encryption configuration.
      * See capability trc:EncryptionEntryLimit for the number of supported entries.
@@ -17281,7 +17281,7 @@ struct tt_RecordingConfiguration {
      * Whatever the value of MaximumRetentionTime, the device may automatically delete
      * recordings to free up storage space for new recordings.
      */
-    std::string MaximumRetentionTime;
+    my_Duration MaximumRetentionTime;
     // Optional external storage target configuration.
     std::optional<tt_RecordingTargetConfiguration> Target;
     // Collection of any elements from namespace: ##any (processContents: lax)
@@ -17561,9 +17561,9 @@ struct xml_convert::XmlTraits<tt_Filter> {
 struct tt_RecordingEventFilter {
     std::vector<tt_Filter> Filter;
     // Optional timespan to record before the actual event condition became active.
-    std::optional<std::string> Before;
+    std::optional<my_Duration> Before;
     // Optional timespan to record after the actual event condition becomes inactive.
-    std::optional<std::string> After;
+    std::optional<my_Duration> After;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     // Any attributes allowed (namespace: ##other, processContents: lax)
@@ -17809,7 +17809,7 @@ struct xml_convert::XmlTraits<tt_GetRecordingJobsResponseItem> {
 // 源文件: onvif_v10.xsd
 struct tt_ReplayConfiguration {
     // The RTSP session timeout.
-    std::string SessionTimeout;
+    my_Duration SessionTimeout;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     // Any attributes allowed (namespace: ##other, processContents: lax)

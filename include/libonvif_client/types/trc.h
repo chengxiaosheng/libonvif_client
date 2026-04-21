@@ -75,9 +75,9 @@ struct trc_Capabilities {
     // Indication that the device supports event triggered recording.
     std::optional<bool> EventRecording;
     // If present a device shall support configuring before event durations up to the given value.
-    std::optional<std::string> BeforeEventLimit;
+    std::optional<my_Duration> BeforeEventLimit;
     // If present a device shall support configuring after event durations up to the given value.
-    std::optional<std::string> AfterEventLimit;
+    std::optional<my_Duration> AfterEventLimit;
     /*
      * List of formats supported by the device for recording to an external target.
      * See tt:TargetFormat for a list of definitions.
@@ -1015,9 +1015,9 @@ struct xml_convert::XmlTraits<trc_GetExportRecordedDataStateResponse> {
 // 源文件: recording_v10.wsdl
 struct trc_OverrideSegmentDuration {
     // The new target duration for recorded segments.
-    std::string TargetSegmentDuration;
+    my_Duration TargetSegmentDuration;
     // The length of time during which the override request is to be in effect.
-    std::string Expiration;
+    my_Duration Expiration;
     // The recording configuration for which the override is requested.
     tt_RecordingReference RecordingConfiguration;
 };

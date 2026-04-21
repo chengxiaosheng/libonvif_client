@@ -22,37 +22,37 @@
 namespace libonvif_client {
 
 // XSD 二进制类型
-struct Base64Binary {
+struct my_Base64Binary {
     // todo: 可以考虑使用 std::vector<uint8_t> 来存储二进制数据, 暂时简化处理为 std::string
     std::string value;
 };
 template<>
-struct xml_convert::XmlValueAdapter<Base64Binary> {
-    static bool to_xml_val(const Base64Binary& val, xmlNodePtr parent, const char* name,
+struct xml_convert::XmlValueAdapter<my_Base64Binary> {
+    static bool to_xml_val(const my_Base64Binary& val, xmlNodePtr parent, const char* name,
                           const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         return xml_convert::to_xml_val(val.value, parent, name, ns_prefix, namespaces);
     }
-    static bool from_xml_val(Base64Binary& val, xmlNodePtr element, const char* name = nullptr, const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
+    static bool from_xml_val(my_Base64Binary& val, xmlNodePtr element, const char* name = nullptr, const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         return xml_convert::from_xml_val(val.value, element, name);
     }
 };
 
-struct HexBinary {
+struct my_HexBinary {
     // todo: 可以考虑使用 std::vector<uint8_t> 来存储二进制数据, 暂时简化处理为 std::string
     std::string value;
 
-    friend std::ostream& operator<<(std::ostream& os, const HexBinary& hex) {
+    friend std::ostream& operator<<(std::ostream& os, const my_HexBinary& hex) {
         os << hex.value;
         return os;
     }
 };
 template<>
-struct xml_convert::XmlValueAdapter<HexBinary> {
-    static bool to_xml_val(const HexBinary& val, xmlNodePtr parent, const char* name,
+struct xml_convert::XmlValueAdapter<my_HexBinary> {
+    static bool to_xml_val(const my_HexBinary& val, xmlNodePtr parent, const char* name,
                           const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         return xml_convert::to_xml_val(val.value, parent, name, ns_prefix, namespaces);
     }
-    static bool from_xml_val(HexBinary& val, xmlNodePtr element, const char* name = nullptr, const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
+    static bool from_xml_val(my_HexBinary& val, xmlNodePtr element, const char* name = nullptr, const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         return xml_convert::from_xml_val(val.value, element, name);
     }
 };
@@ -62,12 +62,12 @@ struct xml_convert::XmlValueAdapter<HexBinary> {
 /**
  * @brief 时间间隔类型，单位为秒
  */
-class Duration {
+class my_Duration {
 public:
-    Duration() = default;
-    explicit Duration(std::chrono::seconds seconds) : seconds_(seconds) {}
+    my_Duration() = default;
+    explicit my_Duration(std::chrono::seconds seconds) : seconds_(seconds) {}
 
-    static Duration form_string(const std::string& durationStr) {
+    static my_Duration form_string(const std::string& durationStr) {
         size_t pos = 0;
         bool negative = false;
         if (durationStr.empty()) throw std::invalid_argument("Empty duration");
@@ -101,7 +101,7 @@ public:
         if (pos != durationStr.size())
             throw std::invalid_argument("Invalid duration format");
 
-        return Duration(negative ? -total : total);
+        return my_Duration(negative ? -total : total);
     }
 
     [[nodiscard]] std::string to_string() const {
@@ -165,32 +165,32 @@ private:
     std::chrono::seconds seconds_{0};
 };
 template<>
-struct libonvif_client::xml_convert::XmlValueAdapter<Duration> {
-    static bool from_xml_val(Duration& val, xmlNodePtr element, const char* name = nullptr,
+struct libonvif_client::xml_convert::XmlValueAdapter<my_Duration> {
+    static bool from_xml_val(my_Duration& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         std::string str_val;
         if (!xml_convert::from_xml_val(str_val, element, name, ns_prefix, namespaces)) {
             return false;
         }
         try {
-            val = Duration::form_string(str_val);
+            val = my_Duration::form_string(str_val);
             return true;
         } catch (const std::exception& e) {
-            ONVIF_LOG_ERROR << "Failed to parse Duration from XML: " << e.what();
+            ONVIF_LOG_ERROR << "Failed to parse my_Duration from XML: " << e.what();
         }
         return false;
     }
-    static bool to_xml_val(const Duration& val, xmlNodePtr parent, const char* name,
+    static bool to_xml_val(const my_Duration& val, xmlNodePtr parent, const char* name,
                           const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         return xml_convert::to_xml_val(val.to_string(), parent, name, ns_prefix, namespaces);
     }
 };
 
-class TimePart {
+class my_TimePart {
 public:
-    TimePart() = default;
-    explicit TimePart(std::chrono::microseconds micro_sec) : micro_sec_(micro_sec) {}
-    static TimePart from_string(const std::string& timeStr) {
+    my_TimePart() = default;
+    explicit my_TimePart(std::chrono::microseconds micro_sec) : micro_sec_(micro_sec) {}
+    static my_TimePart from_string(const std::string& timeStr) {
         // 解析时间字符串 HH:MM:SS[.sss]
         int hours = 0, minutes = 0, seconds = 0, microseconds = 0;
 
@@ -218,7 +218,7 @@ public:
                              + static_cast<int64_t>(seconds) * 1000000
                              + microseconds;
 
-        return TimePart(std::chrono::microseconds(total_micros));
+        return my_TimePart(std::chrono::microseconds(total_micros));
     }
     [[nodiscard]] std::string to_string() const {
         auto total_sec = std::chrono::duration_cast<std::chrono::seconds>(micro_sec_);
@@ -242,22 +242,22 @@ private:
 };
 
 template<>
-struct libonvif_client::xml_convert::XmlValueAdapter<TimePart> {
-    static bool from_xml_val(TimePart& val, xmlNodePtr element, const char* name = nullptr,
+struct libonvif_client::xml_convert::XmlValueAdapter<my_TimePart> {
+    static bool from_xml_val(my_TimePart& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         std::string str_val;
         if (!xml_convert::from_xml_val(str_val, element, name, ns_prefix, namespaces)) {
             return false;
         }
         try {
-            val = TimePart::from_string(str_val);
+            val = my_TimePart::from_string(str_val);
             return true;
         } catch (const std::exception& e) {
-            ONVIF_LOG_ERROR << "Failed to parse TimePart from XML: " << e.what();
+            ONVIF_LOG_ERROR << "Failed to parse my_TimePart from XML: " << e.what();
         }
         return false;
     }
-    static bool to_xml_val(const TimePart& val, xmlNodePtr parent, const char* name,
+    static bool to_xml_val(const my_TimePart& val, xmlNodePtr parent, const char* name,
                           const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         return xml_convert::to_xml_val(val.to_string(), parent, name, ns_prefix, namespaces);
     }

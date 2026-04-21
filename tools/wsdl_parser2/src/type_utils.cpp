@@ -42,7 +42,7 @@ const std::map<std::string, std::string> TypeUtils::XSD_TO_CPP_TYPES = {
     {"xs:token", "std::string"}, {"xsd:token", "std::string"},
     {"xs:anyURI", "std::string"}, {"xsd:anyURI", "std::string"},
     {"xs:QName", "std::string"}, {"xsd:QName", "std::string"}, {"xsd:NCName", "std::string"},
-    {"xs:duration", "std::string"}, {"xsd:duration", "std::string"},
+    {"xs:duration", "my_Duration"}, {"xsd:duration", "my_Duration"},
     
     // 数值类型
     {"xs:int", "int32_t"}, {"xsd:int", "int32_t"},

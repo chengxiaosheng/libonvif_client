@@ -207,8 +207,8 @@ void demo_get_stream_uri(std::shared_ptr<MediaClient> media_client, const std::s
                 if (resp.MediaUri.InvalidAfterReboot) {
                     std::cout << "注意: 此URI在设备重启后会失效\n";
                 }
-                if (!resp.MediaUri.Timeout.empty()) {
-                    std::cout << "超时: " << resp.MediaUri.Timeout << " 秒\n";
+                if (resp.MediaUri.Timeout.duration().count()) {
+                    std::cout << "超时: " << resp.MediaUri.Timeout.duration().count() << " 秒\n";
                 }
             }
             signal_operation_completed();

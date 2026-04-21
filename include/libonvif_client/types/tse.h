@@ -197,7 +197,7 @@ struct tse_FindRecordings {
     // The search will be completed after this many matches. If not specified, the search will continue until reaching the endpoint or until the session expires.
     std::optional<int32_t> MaxMatches;
     // The time the search session will be kept alive after responding to this and subsequent requests. A device shall support at least values up to ten seconds.
-    std::string KeepAliveTime;
+    my_Duration KeepAliveTime;
 };
 
 
@@ -240,7 +240,7 @@ struct tse_GetRecordingSearchResults {
     // The maximum number of results to return in one response.
     std::optional<int32_t> MaxResults;
     // The maximum time before responding to the request, even if the MinResults parameter is not fulfilled.
-    std::optional<std::string> WaitTime;
+    std::optional<my_Duration> WaitTime;
 };
 
 
@@ -288,7 +288,7 @@ struct tse_FindEvents {
     // The search will be completed after this many matches. If not specified, the search will continue until reaching the endpoint or until the session expires.
     std::optional<int32_t> MaxMatches;
     // The time the search session will be kept alive after responding to this and subsequent requests. A device shall support at least values up to ten seconds.
-    std::string KeepAliveTime;
+    my_Duration KeepAliveTime;
 };
 
 
@@ -336,7 +336,7 @@ struct tse_GetEventSearchResults {
     // The maximum number of results to return in one response.
     std::optional<int32_t> MaxResults;
     // The maximum time before responding to the request, even if the MinResults parameter is not fulfilled.
-    std::optional<std::string> WaitTime;
+    std::optional<my_Duration> WaitTime;
 };
 
 
@@ -382,7 +382,7 @@ struct tse_FindPTZPosition {
     // The search will be completed after this many matches. If not specified, the search will continue until reaching the endpoint or until the session expires.
     std::optional<int32_t> MaxMatches;
     // The time the search session will be kept alive after responding to this and subsequent requests. A device shall support at least values up to ten seconds.
-    std::string KeepAliveTime;
+    my_Duration KeepAliveTime;
 };
 
 
@@ -429,7 +429,7 @@ struct tse_GetPTZPositionSearchResults {
     // The maximum number of results to return in one response.
     std::optional<int32_t> MaxResults;
     // The maximum time before responding to the request, even if the MinResults parameter is not fulfilled.
-    std::optional<std::string> WaitTime;
+    std::optional<my_Duration> WaitTime;
 };
 
 
@@ -475,7 +475,7 @@ struct tse_FindMetadata {
     // The search will be completed after this many matches. If not specified, the search will continue until reaching the endpoint or until the session expires.
     std::optional<int32_t> MaxMatches;
     // The time the search session will be kept alive after responding to this and subsequent requests. A device shall support at least values up to ten seconds.
-    std::string KeepAliveTime;
+    my_Duration KeepAliveTime;
 };
 
 
@@ -522,7 +522,7 @@ struct tse_GetMetadataSearchResults {
     // The maximum number of results to return in one response.
     std::optional<int32_t> MaxResults;
     // The maximum time before responding to the request, even if the MinResults parameter is not fulfilled.
-    std::optional<std::string> WaitTime;
+    std::optional<my_Duration> WaitTime;
 };
 
 

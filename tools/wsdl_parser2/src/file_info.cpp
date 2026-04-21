@@ -35,7 +35,7 @@ namespace {
         static const std::set<std::string> cpp_system_types = {
             "std::string", "std::vector", "std::optional", "std::map", "std::set",
             "int32_t", "int64_t", "uint32_t", "uint64_t", "float", "double", "bool",
-            "AnyElement", "DateTime", "TimePart", "Base64Binary", "HexBinary"
+            "AnyElement", "DateTime", "my_TimePart", "my_Base64Binary", "my_HexBinary"
         };
         return cpp_system_types;
     }
@@ -88,7 +88,7 @@ std::string WsdlField::get_cpp_type() const {
         {"xs:token", "std::string"}, {"xsd:token", "std::string"},{"xsd:NCName", "std::string"},
         {"xs:anyURI", "std::string"}, {"xsd:anyURI", "std::string"},
         {"xs:QName", "std::string"}, {"xsd:QName", "std::string"},
-        {"xs:duration", "std::string"}, {"xsd:duration", "std::string"},
+        {"xs:duration", "my_Duration"}, {"xsd:duration", "my_Duration"},
         
         // 数值类型
         {"xs:int", "int32_t"}, {"xsd:int", "int32_t"},
@@ -112,11 +112,11 @@ std::string WsdlField::get_cpp_type() const {
         // 日期时间类型（使用libonvif_client的类型）
         {"xs:dateTime", "DateTime"}, {"xsd:dateTime", "DateTime"},
         {"xs:date", "DateTime"}, {"xsd:date", "DateTime"},
-        {"xs:time", "TimePart"}, {"xsd:time", "TimePart"},
+        {"xs:time", "my_TimePart"}, {"xsd:time", "my_TimePart"},
         
         // 二进制类型
-        {"xs:base64Binary", "Base64Binary"}, {"xsd:base64Binary", "Base64Binary"},
-        {"xs:hexBinary", "HexBinary"}, {"xsd:hexBinary", "HexBinary"},
+        {"xs:base64Binary", "my_Base64Binary"}, {"xsd:base64Binary", "my_Base64Binary"},
+        {"xs:hexBinary", "my_HexBinary"}, {"xsd:hexBinary", "my_HexBinary"},
         
         // ONVIF特定类型
         {"xs:anyType", "AnyElement"}, {"xsd:anyType", "AnyElement"}
