@@ -477,8 +477,14 @@ std::string TypeGenerator::generate_list_type(const WsdlType& type) const {
 
     std::string prefixed_name = get_prefixed_type_name(type);
 
-    // 直接使用 using 别名，不再生成包装结构体
-    oss << "using " << prefixed_name << " = std::vector<" << element_cpp_type << ">;\n";
+    if (TypeUtils::is_basic_cpp_type(element_cpp_type)) {
+        // 采用 std::vector 派生 using 避免污染正常的数组元素
+        oss << "struct " << prefixed_name << " : std::vector<" << element_cpp_type << "> {\n";
+        oss << options_.indent << "using std::vector<" << element_cpp_type << ">::vector;\n";
+        oss << "};\n";
+    } else {
+        oss << "using " << prefixed_name << " = std::vector<" << element_cpp_type << ">;\n";
+    }
 
     return oss.str();
 }

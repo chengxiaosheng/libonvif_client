@@ -164,7 +164,9 @@ struct xml_convert::XmlTraits<tt_IntItems> {
 
 // IntList 列表类型别名
 // 元素类型: int32_t
-using tt_IntList = std::vector<int32_t>;
+struct tt_IntList : std::vector<int32_t> {
+    using std::vector<int32_t>::vector;
+};
 
 
 // XmlValueAdapter specialization for list tt_IntList
@@ -261,7 +263,9 @@ struct xml_convert::XmlAttributeAdapter<tt_IntList> {
 
 // FloatList 列表类型别名
 // 元素类型: float
-using tt_FloatList = std::vector<float>;
+struct tt_FloatList : std::vector<float> {
+    using std::vector<float>::vector;
+};
 
 
 // XmlValueAdapter specialization for list tt_FloatList
@@ -358,7 +362,9 @@ struct xml_convert::XmlAttributeAdapter<tt_FloatList> {
 
 // StringAttrList 列表类型别名
 // 元素类型: std::string
-using tt_StringAttrList = std::vector<std::string>;
+struct tt_StringAttrList : std::vector<std::string> {
+    using std::vector<std::string>::vector;
+};
 
 
 // XmlValueAdapter specialization for list tt_StringAttrList

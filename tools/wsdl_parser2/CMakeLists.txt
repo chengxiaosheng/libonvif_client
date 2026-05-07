@@ -8,31 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # 查找依赖库
 find_package(LibXml2 REQUIRED)
 
-# 查找 jsoncpp，如果找不到则使用 FetchContent 下载
-find_package(jsoncpp QUIET)
-if(NOT jsoncpp_FOUND)
-    message(STATUS "jsoncpp 未找到，使用 FetchContent 下载...")
-    include(FetchContent)
 
-    FetchContent_Declare(
-        jsoncpp
-        GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
-        GIT_TAG 1.9.6  # 稳定版本
-        GIT_SHALLOW TRUE
-    )
 
-    # 设置 jsoncpp 选项
-    set(JSONCPP_WITH_TESTS OFF CACHE BOOL "" FORCE)
-    set(JSONCPP_WITH_POST_BUILD_UNITTEST OFF CACHE BOOL "" FORCE)
-    set(JSONCPP_WITH_WARNING_AS_ERROR OFF CACHE BOOL "" FORCE)
-    set(JSONCPP_WITH_PKGCONFIG_SUPPORT OFF CACHE BOOL "" FORCE)
-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-    set(JSONCPP_WITH_CMAKE_PACKAGE OFF CACHE BOOL "" FORCE)
-
-    FetchContent_MakeAvailable(jsoncpp)
-
-    message(STATUS "jsoncpp 已下载: ${jsoncpp_SOURCE_DIR}")
-endif()
 
 
 # 源文件
@@ -53,6 +30,8 @@ add_executable(wsdl_parser2 ${WSDL_PARSER2_SOURCES})
 # 包含目录
 target_include_directories(wsdl_parser2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 # 链接库（处理系统安装和 FetchContent 两种情况）
+# 查找 jsoncpp，如果找不到则使用 FetchContent 下载
+find_package(jsoncpp QUIET)
 if(TARGET JsonCpp::JsonCpp)
     target_link_libraries(wsdl_parser2 PRIVATE LibXml2::LibXml2 JsonCpp::JsonCpp)
 elseif(TARGET jsoncpp_lib)
@@ -60,7 +39,27 @@ elseif(TARGET jsoncpp_lib)
 elseif(TARGET jsoncpp_static)
     target_link_libraries(wsdl_parser2 PRIVATE LibXml2::LibXml2 jsoncpp_static)
 else()
-    message(FATAL_ERROR "无法找到 jsoncpp 目标")
+    message(STATUS "jsoncpp 未找到，使用 FetchContent 下载...")
+    include(FetchContent)
+
+    FetchContent_Declare(
+            jsoncpp
+            GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
+            GIT_TAG 1.9.6  # 稳定版本
+            GIT_SHALLOW TRUE
+    )
+
+    # 设置 jsoncpp 选项
+    set(JSONCPP_WITH_TESTS OFF CACHE BOOL "" FORCE)
+    set(JSONCPP_WITH_POST_BUILD_UNITTEST OFF CACHE BOOL "" FORCE)
+    set(JSONCPP_WITH_WARNING_AS_ERROR OFF CACHE BOOL "" FORCE)
+    set(JSONCPP_WITH_PKGCONFIG_SUPPORT OFF CACHE BOOL "" FORCE)
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set(JSONCPP_WITH_CMAKE_PACKAGE OFF CACHE BOOL "" FORCE)
+
+    FetchContent_MakeAvailable(jsoncpp)
+
+    message(STATUS "jsoncpp 已下载: ${jsoncpp_SOURCE_DIR}")
 endif()
 
 if (UNIX)
