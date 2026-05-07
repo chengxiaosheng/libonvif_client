@@ -256,6 +256,11 @@ namespace libonvif_client {
                     if (xml_convert::from_xml_val(*data, body, response_element_name.c_str(),
                                                  ns_prefix_str.c_str(), get_namespace_map())) {
                         result.data = std::move(data);
+                    }
+                    // todo: 考虑使用配置项来处理
+                    // 有些设备 返回的根元素名称与标准协议不同 , 如海康部分设备： http://www.onvif.org/ver20/media/wsdl/GetOSDs -> <tr2:GetOSDResponse>...</tr2:GetOSDResponse>
+                    else if (xml_convert::from_xml_val(*data, body->children, nullptr,ns_prefix_str.c_str(), get_namespace_map())) {
+                        result.data = std::move(data);
                     } else {
                         result.soap_fault = std::make_unique<SoapFault>();
                         result.soap_fault->set_owned_error(
