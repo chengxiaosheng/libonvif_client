@@ -377,6 +377,8 @@ namespace libonvif_client {
                                  const char* element_name,
                                  const char* ns_prefix) {
             auto xml_ptr = std::shared_ptr<xmlDoc>(xmlNewDoc(BAD_CAST "1.0"), xmlFreeDoc);
+            // 添加编码，避免中文乱码
+            xml_ptr->encoding = xmlStrdup(BAD_CAST "UTF-8");
             auto envelope = xmlNewNode(nullptr, BAD_CAST"Envelope");
             xmlDocSetRootElement(xml_ptr.get(), envelope);
 

@@ -603,7 +603,7 @@ std::string TypeGenerator::generate_enum_xml_traits(const WsdlType& type) const 
     oss << options_.indent << "static bool from_xml_val(" << prefixed_name << "& val, xmlNodePtr element, const char* name = nullptr,\n";
     oss << options_.indent << "                         const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {\n";
     oss << options_.indent << options_.indent << "xmlNodePtr targetElement = name ? \n";
-    oss << options_.indent << options_.indent << "    xmlGetChildElementByName(element, name) : element;\n";
+    oss << options_.indent << options_.indent << "    xml_convert::detail::xmlGetChildElementByName(element, name) : element;\n";
     oss << options_.indent << options_.indent << "if (!targetElement) return false;\n";
     oss << options_.indent << options_.indent << "xmlChar* content = xmlNodeGetContent(targetElement);\n";
     oss << options_.indent << options_.indent << "if (!content) return false;\n";
@@ -612,44 +612,18 @@ std::string TypeGenerator::generate_enum_xml_traits(const WsdlType& type) const 
     oss << options_.indent << options_.indent << "return from_string(val, str_val);\n";
     oss << options_.indent << "}\n";
     oss << options_.indent << "\n";
-    
+
     // to_xml_val方法 - 适配新的API
     oss << options_.indent << "static bool to_xml_val(const " << prefixed_name << "& val, xmlNodePtr parent, const char* name,\n";
     oss << options_.indent << "                       const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {\n";
     oss << options_.indent << options_.indent << "if (!parent || !name) return false;\n";
-    oss << options_.indent << options_.indent << "xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);\n";
+    oss << options_.indent << options_.indent << "xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);\n";
     oss << options_.indent << options_.indent << "if (!element) return false;\n";
     oss << options_.indent << options_.indent << "xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());\n";
     oss << options_.indent << options_.indent << "return true;\n";
     oss << options_.indent << "}\n";
     oss << options_.indent << "\n";
     
-    // 辅助函数：创建带命名空间的元素
-    oss << "private:\n";
-    oss << options_.indent << "static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, \n";
-    oss << options_.indent << "                                        const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {\n";
-    oss << options_.indent << options_.indent << "xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);\n";
-    oss << options_.indent << options_.indent << "if (element && ns_prefix) {\n";
-    oss << options_.indent << options_.indent << options_.indent << "auto it = namespaces.find(ns_prefix);\n";
-    oss << options_.indent << options_.indent << options_.indent << "if (it != namespaces.end()) {\n";
-    oss << options_.indent << options_.indent << options_.indent << options_.indent << "xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);\n";
-    oss << options_.indent << options_.indent << options_.indent << options_.indent << "xmlSetNs(element, ns);\n";
-    oss << options_.indent << options_.indent << options_.indent << "}\n";
-    oss << options_.indent << options_.indent << "}\n";
-    oss << options_.indent << options_.indent << "return element;\n";
-    oss << options_.indent << "}\n";
-    
-    oss << options_.indent << "\n";
-    oss << options_.indent << "static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {\n";
-    oss << options_.indent << options_.indent << "if (!parent || !name) return nullptr;\n";
-    oss << options_.indent << options_.indent << "for (xmlNodePtr child = parent->children; child; child = child->next) {\n";
-    oss << options_.indent << options_.indent << options_.indent << "if (child->type == XML_ELEMENT_NODE && \n";
-    oss << options_.indent << options_.indent << options_.indent << "    xmlStrcmp(child->name, BAD_CAST name) == 0) {\n";
-    oss << options_.indent << options_.indent << options_.indent << options_.indent << "return child;\n";
-    oss << options_.indent << options_.indent << options_.indent << "}\n";
-    oss << options_.indent << options_.indent << "}\n";
-    oss << options_.indent << options_.indent << "return nullptr;\n";
-    oss << options_.indent << "}\n";
     oss << "};\n\n";
     
     // 为枚举类型生成 XmlAttributeAdapter 特化
@@ -700,7 +674,7 @@ std::string TypeGenerator::generate_list_xml_traits(const WsdlType& type) const 
     oss << options_.indent << "static bool from_xml_val(" << prefixed_name << "& val, xmlNodePtr element, const char* name = nullptr,\n";
     oss << options_.indent << "                         const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {\n";
     oss << options_.indent << options_.indent << "xmlNodePtr targetElement = name ? \n";
-    oss << options_.indent << options_.indent << "    xmlGetChildElementByName(element, name) : element;\n";
+    oss << options_.indent << options_.indent << "    xml_convert::detail::xmlGetChildElementByName(element, name) : element;\n";
     oss << options_.indent << options_.indent << "if (!targetElement) return false;\n";
     oss << options_.indent << options_.indent << "val.clear();  // 直接操作vector，不再是val.value\n";
     oss << options_.indent << options_.indent << "xmlChar* content = xmlNodeGetContent(targetElement);\n";
@@ -737,7 +711,7 @@ std::string TypeGenerator::generate_list_xml_traits(const WsdlType& type) const 
     oss << options_.indent << "static bool to_xml_val(const " << prefixed_name << "& val, xmlNodePtr parent, const char* name,\n";
     oss << options_.indent << "                       const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {\n";
     oss << options_.indent << options_.indent << "if (!parent || !name) return false;\n";
-    oss << options_.indent << options_.indent << "xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);\n";
+    oss << options_.indent << options_.indent << "xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);\n";
     oss << options_.indent << options_.indent << "if (!element) return false;\n";
     oss << options_.indent << options_.indent << "std::ostringstream oss;\n";
     oss << options_.indent << options_.indent << "for (size_t i = 0; i < val.size(); ++i) {\n";
@@ -756,33 +730,6 @@ std::string TypeGenerator::generate_list_xml_traits(const WsdlType& type) const 
     oss << options_.indent << options_.indent << "}\n";
     oss << options_.indent << options_.indent << "xmlNodeSetContent(element, BAD_CAST oss.str().c_str());\n";
     oss << options_.indent << options_.indent << "return true;\n";
-    oss << options_.indent << "}\n";
-    oss << options_.indent << "\n";
-    
-    // 辅助函数
-    oss << "private:\n";
-    oss << options_.indent << "static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, \n";
-    oss << options_.indent << "                                        const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {\n";
-    oss << options_.indent << options_.indent << "xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);\n";
-    oss << options_.indent << options_.indent << "if (element && ns_prefix) {\n";
-    oss << options_.indent << options_.indent << options_.indent << "auto it = namespaces.find(ns_prefix);\n";
-    oss << options_.indent << options_.indent << options_.indent << "if (it != namespaces.end()) {\n";
-    oss << options_.indent << options_.indent << options_.indent << options_.indent << "xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);\n";
-    oss << options_.indent << options_.indent << options_.indent << options_.indent << "xmlSetNs(element, ns);\n";
-    oss << options_.indent << options_.indent << options_.indent << "}\n";
-    oss << options_.indent << options_.indent << "}\n";
-    oss << options_.indent << options_.indent << "return element;\n";
-    oss << options_.indent << "}\n";
-    oss << options_.indent << "\n";
-    oss << options_.indent << "static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {\n";
-    oss << options_.indent << options_.indent << "if (!parent || !name) return nullptr;\n";
-    oss << options_.indent << options_.indent << "for (xmlNodePtr child = parent->children; child; child = child->next) {\n";
-    oss << options_.indent << options_.indent << options_.indent << "if (child->type == XML_ELEMENT_NODE && \n";
-    oss << options_.indent << options_.indent << options_.indent << "    xmlStrcmp(child->name, BAD_CAST name) == 0) {\n";
-    oss << options_.indent << options_.indent << options_.indent << options_.indent << "return child;\n";
-    oss << options_.indent << options_.indent << options_.indent << "}\n";
-    oss << options_.indent << options_.indent << "}\n";
-    oss << options_.indent << options_.indent << "return nullptr;\n";
     oss << options_.indent << "}\n";
     oss << "};\n";
 

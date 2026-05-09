@@ -175,7 +175,7 @@ struct xml_convert::XmlValueAdapter<tt_IntList> {
     static bool from_xml_val(tt_IntList& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         val.clear();  // 直接操作vector，不再是val.value
         xmlChar* content = xmlNodeGetContent(targetElement);
@@ -195,7 +195,7 @@ struct xml_convert::XmlValueAdapter<tt_IntList> {
     static bool to_xml_val(const tt_IntList& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         std::ostringstream oss;
         for (size_t i = 0; i < val.size(); ++i) {
@@ -204,31 +204,6 @@ struct xml_convert::XmlValueAdapter<tt_IntList> {
         }
         xmlNodeSetContent(element, BAD_CAST oss.str().c_str());
         return true;
-    }
-    
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
     }
 };
 // XmlAttributeAdapter specialization for list tt_IntList
@@ -274,7 +249,7 @@ struct xml_convert::XmlValueAdapter<tt_FloatList> {
     static bool from_xml_val(tt_FloatList& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         val.clear();  // 直接操作vector，不再是val.value
         xmlChar* content = xmlNodeGetContent(targetElement);
@@ -294,7 +269,7 @@ struct xml_convert::XmlValueAdapter<tt_FloatList> {
     static bool to_xml_val(const tt_FloatList& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         std::ostringstream oss;
         for (size_t i = 0; i < val.size(); ++i) {
@@ -303,31 +278,6 @@ struct xml_convert::XmlValueAdapter<tt_FloatList> {
         }
         xmlNodeSetContent(element, BAD_CAST oss.str().c_str());
         return true;
-    }
-    
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
     }
 };
 // XmlAttributeAdapter specialization for list tt_FloatList
@@ -373,7 +323,7 @@ struct xml_convert::XmlValueAdapter<tt_StringAttrList> {
     static bool from_xml_val(tt_StringAttrList& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         val.clear();  // 直接操作vector，不再是val.value
         xmlChar* content = xmlNodeGetContent(targetElement);
@@ -391,7 +341,7 @@ struct xml_convert::XmlValueAdapter<tt_StringAttrList> {
     static bool to_xml_val(const tt_StringAttrList& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         std::ostringstream oss;
         for (size_t i = 0; i < val.size(); ++i) {
@@ -400,31 +350,6 @@ struct xml_convert::XmlValueAdapter<tt_StringAttrList> {
         }
         xmlNodeSetContent(element, BAD_CAST oss.str().c_str());
         return true;
-    }
-    
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
     }
 };
 // XmlAttributeAdapter specialization for list tt_StringAttrList
@@ -575,7 +500,7 @@ struct xml_convert::XmlValueAdapter<tt_BacklightCompensationMode> {
     static bool from_xml_val(tt_BacklightCompensationMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -587,36 +512,12 @@ struct xml_convert::XmlValueAdapter<tt_BacklightCompensationMode> {
     static bool to_xml_val(const tt_BacklightCompensationMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_BacklightCompensationMode
@@ -690,7 +591,7 @@ struct xml_convert::XmlValueAdapter<tt_ExposureMode> {
     static bool from_xml_val(tt_ExposureMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -702,36 +603,12 @@ struct xml_convert::XmlValueAdapter<tt_ExposureMode> {
     static bool to_xml_val(const tt_ExposureMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ExposureMode
@@ -784,7 +661,7 @@ struct xml_convert::XmlValueAdapter<tt_ExposurePriority> {
     static bool from_xml_val(tt_ExposurePriority& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -796,36 +673,12 @@ struct xml_convert::XmlValueAdapter<tt_ExposurePriority> {
     static bool to_xml_val(const tt_ExposurePriority& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ExposurePriority
@@ -934,7 +787,7 @@ struct xml_convert::XmlValueAdapter<tt_AutoFocusMode> {
     static bool from_xml_val(tt_AutoFocusMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -946,36 +799,12 @@ struct xml_convert::XmlValueAdapter<tt_AutoFocusMode> {
     static bool to_xml_val(const tt_AutoFocusMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_AutoFocusMode
@@ -1065,7 +894,7 @@ struct xml_convert::XmlValueAdapter<tt_IrCutFilterMode> {
     static bool from_xml_val(tt_IrCutFilterMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -1077,36 +906,12 @@ struct xml_convert::XmlValueAdapter<tt_IrCutFilterMode> {
     static bool to_xml_val(const tt_IrCutFilterMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_IrCutFilterMode
@@ -1159,7 +964,7 @@ struct xml_convert::XmlValueAdapter<tt_WideDynamicMode> {
     static bool from_xml_val(tt_WideDynamicMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -1171,36 +976,12 @@ struct xml_convert::XmlValueAdapter<tt_WideDynamicMode> {
     static bool to_xml_val(const tt_WideDynamicMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_WideDynamicMode
@@ -1274,7 +1055,7 @@ struct xml_convert::XmlValueAdapter<tt_WhiteBalanceMode> {
     static bool from_xml_val(tt_WhiteBalanceMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -1286,36 +1067,12 @@ struct xml_convert::XmlValueAdapter<tt_WhiteBalanceMode> {
     static bool to_xml_val(const tt_WhiteBalanceMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_WhiteBalanceMode
@@ -1676,7 +1433,7 @@ struct xml_convert::XmlValueAdapter<tt_ImageStabilizationMode> {
     static bool from_xml_val(tt_ImageStabilizationMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -1688,36 +1445,12 @@ struct xml_convert::XmlValueAdapter<tt_ImageStabilizationMode> {
     static bool to_xml_val(const tt_ImageStabilizationMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ImageStabilizationMode
@@ -2231,7 +1964,7 @@ struct xml_convert::XmlValueAdapter<tt_RotateMode> {
     static bool from_xml_val(tt_RotateMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -2243,36 +1976,12 @@ struct xml_convert::XmlValueAdapter<tt_RotateMode> {
     static bool to_xml_val(const tt_RotateMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_RotateMode
@@ -2466,7 +2175,7 @@ struct xml_convert::XmlValueAdapter<tt_SceneOrientationMode> {
     static bool from_xml_val(tt_SceneOrientationMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -2478,36 +2187,12 @@ struct xml_convert::XmlValueAdapter<tt_SceneOrientationMode> {
     static bool to_xml_val(const tt_SceneOrientationMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_SceneOrientationMode
@@ -2694,7 +2379,7 @@ struct xml_convert::XmlValueAdapter<tt_VideoEncoding> {
     static bool from_xml_val(tt_VideoEncoding& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -2706,36 +2391,12 @@ struct xml_convert::XmlValueAdapter<tt_VideoEncoding> {
     static bool to_xml_val(const tt_VideoEncoding& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_VideoEncoding
@@ -2812,7 +2473,7 @@ struct xml_convert::XmlValueAdapter<tt_Mpeg4Profile> {
     static bool from_xml_val(tt_Mpeg4Profile& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -2824,36 +2485,12 @@ struct xml_convert::XmlValueAdapter<tt_Mpeg4Profile> {
     static bool to_xml_val(const tt_Mpeg4Profile& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_Mpeg4Profile
@@ -2933,7 +2570,7 @@ struct xml_convert::XmlValueAdapter<tt_H264Profile> {
     static bool from_xml_val(tt_H264Profile& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -2945,36 +2582,12 @@ struct xml_convert::XmlValueAdapter<tt_H264Profile> {
     static bool to_xml_val(const tt_H264Profile& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_H264Profile
@@ -3048,7 +2661,7 @@ struct xml_convert::XmlValueAdapter<tt_IPType> {
     static bool from_xml_val(tt_IPType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -3060,36 +2673,12 @@ struct xml_convert::XmlValueAdapter<tt_IPType> {
     static bool to_xml_val(const tt_IPType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_IPType
@@ -3264,7 +2853,7 @@ struct xml_convert::XmlValueAdapter<tt_AudioEncoding> {
     static bool from_xml_val(tt_AudioEncoding& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -3276,36 +2865,12 @@ struct xml_convert::XmlValueAdapter<tt_AudioEncoding> {
     static bool to_xml_val(const tt_AudioEncoding& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_AudioEncoding
@@ -3714,7 +3279,7 @@ struct xml_convert::XmlValueAdapter<tt_EFlipMode> {
     static bool from_xml_val(tt_EFlipMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -3726,36 +3291,12 @@ struct xml_convert::XmlValueAdapter<tt_EFlipMode> {
     static bool to_xml_val(const tt_EFlipMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_EFlipMode
@@ -3838,7 +3379,7 @@ struct xml_convert::XmlValueAdapter<tt_ReverseMode> {
     static bool from_xml_val(tt_ReverseMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -3850,36 +3391,12 @@ struct xml_convert::XmlValueAdapter<tt_ReverseMode> {
     static bool to_xml_val(const tt_ReverseMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ReverseMode
@@ -4553,7 +4070,7 @@ struct xml_convert::XmlValueAdapter<tt_SceneOrientationOption> {
     static bool from_xml_val(tt_SceneOrientationOption& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -4565,36 +4082,12 @@ struct xml_convert::XmlValueAdapter<tt_SceneOrientationOption> {
     static bool to_xml_val(const tt_SceneOrientationOption& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_SceneOrientationOption
@@ -4665,7 +4158,7 @@ struct xml_convert::XmlValueAdapter<tt_ViewModes> {
     static bool from_xml_val(tt_ViewModes& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -4677,36 +4170,12 @@ struct xml_convert::XmlValueAdapter<tt_ViewModes> {
     static bool to_xml_val(const tt_ViewModes& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ViewModes
@@ -5003,7 +4472,7 @@ struct xml_convert::XmlValueAdapter<tt_VideoEncodingMimeNames> {
     static bool from_xml_val(tt_VideoEncodingMimeNames& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -5015,36 +4484,12 @@ struct xml_convert::XmlValueAdapter<tt_VideoEncodingMimeNames> {
     static bool to_xml_val(const tt_VideoEncodingMimeNames& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_VideoEncodingMimeNames
@@ -5112,7 +4557,7 @@ struct xml_convert::XmlValueAdapter<tt_VideoEncodingProfiles> {
     static bool from_xml_val(tt_VideoEncodingProfiles& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -5124,36 +4569,12 @@ struct xml_convert::XmlValueAdapter<tt_VideoEncodingProfiles> {
     static bool to_xml_val(const tt_VideoEncodingProfiles& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_VideoEncodingProfiles
@@ -5467,7 +4888,7 @@ struct xml_convert::XmlValueAdapter<tt_AudioEncodingMimeNames> {
     static bool from_xml_val(tt_AudioEncodingMimeNames& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -5479,36 +4900,12 @@ struct xml_convert::XmlValueAdapter<tt_AudioEncodingMimeNames> {
     static bool to_xml_val(const tt_AudioEncodingMimeNames& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_AudioEncodingMimeNames
@@ -5752,7 +5149,7 @@ struct xml_convert::XmlValueAdapter<tt_MetadataCompressionType> {
     static bool from_xml_val(tt_MetadataCompressionType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -5764,36 +5161,12 @@ struct xml_convert::XmlValueAdapter<tt_MetadataCompressionType> {
     static bool to_xml_val(const tt_MetadataCompressionType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_MetadataCompressionType
@@ -6627,7 +6000,7 @@ struct xml_convert::XmlValueAdapter<tt_StreamType> {
     static bool from_xml_val(tt_StreamType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -6639,36 +6012,12 @@ struct xml_convert::XmlValueAdapter<tt_StreamType> {
     static bool to_xml_val(const tt_StreamType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_StreamType
@@ -6727,7 +6076,7 @@ struct xml_convert::XmlValueAdapter<tt_TransportProtocol> {
     static bool from_xml_val(tt_TransportProtocol& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -6739,36 +6088,12 @@ struct xml_convert::XmlValueAdapter<tt_TransportProtocol> {
     static bool to_xml_val(const tt_TransportProtocol& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_TransportProtocol
@@ -6901,7 +6226,7 @@ struct xml_convert::XmlValueAdapter<tt_ScopeDefinition> {
     static bool from_xml_val(tt_ScopeDefinition& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -6913,36 +6238,12 @@ struct xml_convert::XmlValueAdapter<tt_ScopeDefinition> {
     static bool to_xml_val(const tt_ScopeDefinition& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ScopeDefinition
@@ -7016,7 +6317,7 @@ struct xml_convert::XmlValueAdapter<tt_DiscoveryMode> {
     static bool from_xml_val(tt_DiscoveryMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -7028,36 +6329,12 @@ struct xml_convert::XmlValueAdapter<tt_DiscoveryMode> {
     static bool to_xml_val(const tt_DiscoveryMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_DiscoveryMode
@@ -7139,7 +6416,7 @@ struct xml_convert::XmlValueAdapter<tt_Duplex> {
     static bool from_xml_val(tt_Duplex& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -7151,36 +6428,12 @@ struct xml_convert::XmlValueAdapter<tt_Duplex> {
     static bool to_xml_val(const tt_Duplex& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_Duplex
@@ -7367,7 +6620,7 @@ struct xml_convert::XmlValueAdapter<tt_IPv6DHCPConfiguration> {
     static bool from_xml_val(tt_IPv6DHCPConfiguration& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -7379,36 +6632,12 @@ struct xml_convert::XmlValueAdapter<tt_IPv6DHCPConfiguration> {
     static bool to_xml_val(const tt_IPv6DHCPConfiguration& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_IPv6DHCPConfiguration
@@ -7588,7 +6817,7 @@ struct xml_convert::XmlValueAdapter<tt_Dot11StationMode> {
     static bool from_xml_val(tt_Dot11StationMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -7600,36 +6829,12 @@ struct xml_convert::XmlValueAdapter<tt_Dot11StationMode> {
     static bool to_xml_val(const tt_Dot11StationMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_Dot11StationMode
@@ -7696,7 +6901,7 @@ struct xml_convert::XmlValueAdapter<tt_Dot11SecurityMode> {
     static bool from_xml_val(tt_Dot11SecurityMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -7708,36 +6913,12 @@ struct xml_convert::XmlValueAdapter<tt_Dot11SecurityMode> {
     static bool to_xml_val(const tt_Dot11SecurityMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_Dot11SecurityMode
@@ -7796,7 +6977,7 @@ struct xml_convert::XmlValueAdapter<tt_Dot11Cipher> {
     static bool from_xml_val(tt_Dot11Cipher& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -7808,36 +6989,12 @@ struct xml_convert::XmlValueAdapter<tt_Dot11Cipher> {
     static bool to_xml_val(const tt_Dot11Cipher& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_Dot11Cipher
@@ -8114,7 +7271,7 @@ struct xml_convert::XmlValueAdapter<tt_NetworkProtocolType> {
     static bool from_xml_val(tt_NetworkProtocolType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -8126,36 +7283,12 @@ struct xml_convert::XmlValueAdapter<tt_NetworkProtocolType> {
     static bool to_xml_val(const tt_NetworkProtocolType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_NetworkProtocolType
@@ -8258,7 +7391,7 @@ struct xml_convert::XmlValueAdapter<tt_NetworkHostType> {
     static bool from_xml_val(tt_NetworkHostType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -8270,36 +7403,12 @@ struct xml_convert::XmlValueAdapter<tt_NetworkHostType> {
     static bool to_xml_val(const tt_NetworkHostType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_NetworkHostType
@@ -8553,7 +7662,7 @@ struct xml_convert::XmlValueAdapter<tt_IPAddressFilterType> {
     static bool from_xml_val(tt_IPAddressFilterType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -8565,36 +7674,12 @@ struct xml_convert::XmlValueAdapter<tt_IPAddressFilterType> {
     static bool to_xml_val(const tt_IPAddressFilterType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_IPAddressFilterType
@@ -8650,7 +7735,7 @@ struct xml_convert::XmlValueAdapter<tt_DynamicDNSType> {
     static bool from_xml_val(tt_DynamicDNSType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -8662,36 +7747,12 @@ struct xml_convert::XmlValueAdapter<tt_DynamicDNSType> {
     static bool to_xml_val(const tt_DynamicDNSType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_DynamicDNSType
@@ -9097,7 +8158,7 @@ struct xml_convert::XmlValueAdapter<tt_Dot11SignalStrength> {
     static bool from_xml_val(tt_Dot11SignalStrength& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -9109,36 +8170,12 @@ struct xml_convert::XmlValueAdapter<tt_Dot11SignalStrength> {
     static bool to_xml_val(const tt_Dot11SignalStrength& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_Dot11SignalStrength
@@ -9230,7 +8267,7 @@ struct xml_convert::XmlValueAdapter<tt_Dot11AuthAndMangementSuite> {
     static bool from_xml_val(tt_Dot11AuthAndMangementSuite& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -9242,36 +8279,12 @@ struct xml_convert::XmlValueAdapter<tt_Dot11AuthAndMangementSuite> {
     static bool to_xml_val(const tt_Dot11AuthAndMangementSuite& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_Dot11AuthAndMangementSuite
@@ -9390,7 +8403,7 @@ struct xml_convert::XmlValueAdapter<tt_CapabilityCategory> {
     static bool from_xml_val(tt_CapabilityCategory& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -9402,36 +8415,12 @@ struct xml_convert::XmlValueAdapter<tt_CapabilityCategory> {
     static bool to_xml_val(const tt_CapabilityCategory& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_CapabilityCategory
@@ -10432,7 +9421,7 @@ struct xml_convert::XmlValueAdapter<tt_SystemLogType> {
     static bool from_xml_val(tt_SystemLogType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -10444,36 +9433,12 @@ struct xml_convert::XmlValueAdapter<tt_SystemLogType> {
     static bool to_xml_val(const tt_SystemLogType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_SystemLogType
@@ -10668,7 +9633,7 @@ struct xml_convert::XmlValueAdapter<tt_FactoryDefaultType> {
     static bool from_xml_val(tt_FactoryDefaultType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -10680,36 +9645,12 @@ struct xml_convert::XmlValueAdapter<tt_FactoryDefaultType> {
     static bool to_xml_val(const tt_FactoryDefaultType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_FactoryDefaultType
@@ -10762,7 +9703,7 @@ struct xml_convert::XmlValueAdapter<tt_SetDateTimeType> {
     static bool from_xml_val(tt_SetDateTimeType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -10774,36 +9715,12 @@ struct xml_convert::XmlValueAdapter<tt_SetDateTimeType> {
     static bool to_xml_val(const tt_SetDateTimeType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_SetDateTimeType
@@ -11029,7 +9946,7 @@ struct xml_convert::XmlValueAdapter<tt_UserLevel> {
     static bool from_xml_val(tt_UserLevel& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -11041,36 +9958,12 @@ struct xml_convert::XmlValueAdapter<tt_UserLevel> {
     static bool to_xml_val(const tt_UserLevel& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_UserLevel
@@ -11558,7 +10451,7 @@ struct xml_convert::XmlValueAdapter<tt_RelayLogicalState> {
     static bool from_xml_val(tt_RelayLogicalState& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -11570,36 +10463,12 @@ struct xml_convert::XmlValueAdapter<tt_RelayLogicalState> {
     static bool to_xml_val(const tt_RelayLogicalState& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_RelayLogicalState
@@ -11652,7 +10521,7 @@ struct xml_convert::XmlValueAdapter<tt_RelayIdleState> {
     static bool from_xml_val(tt_RelayIdleState& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -11664,36 +10533,12 @@ struct xml_convert::XmlValueAdapter<tt_RelayIdleState> {
     static bool to_xml_val(const tt_RelayIdleState& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_RelayIdleState
@@ -11746,7 +10591,7 @@ struct xml_convert::XmlValueAdapter<tt_RelayMode> {
     static bool from_xml_val(tt_RelayMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -11758,36 +10603,12 @@ struct xml_convert::XmlValueAdapter<tt_RelayMode> {
     static bool to_xml_val(const tt_RelayMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_RelayMode
@@ -11897,7 +10718,7 @@ struct xml_convert::XmlValueAdapter<tt_DigitalIdleState> {
     static bool from_xml_val(tt_DigitalIdleState& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -11909,36 +10730,12 @@ struct xml_convert::XmlValueAdapter<tt_DigitalIdleState> {
     static bool to_xml_val(const tt_DigitalIdleState& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_DigitalIdleState
@@ -12113,7 +10910,7 @@ struct xml_convert::XmlValueAdapter<tt_PTZPresetTourOperation> {
     static bool from_xml_val(tt_PTZPresetTourOperation& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -12125,36 +10922,12 @@ struct xml_convert::XmlValueAdapter<tt_PTZPresetTourOperation> {
     static bool to_xml_val(const tt_PTZPresetTourOperation& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_PTZPresetTourOperation
@@ -12548,7 +11321,7 @@ struct xml_convert::XmlValueAdapter<tt_PTZPresetTourState> {
     static bool from_xml_val(tt_PTZPresetTourState& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -12560,36 +11333,12 @@ struct xml_convert::XmlValueAdapter<tt_PTZPresetTourState> {
     static bool to_xml_val(const tt_PTZPresetTourState& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_PTZPresetTourState
@@ -12645,7 +11394,7 @@ struct xml_convert::XmlValueAdapter<tt_PTZPresetTourDirection> {
     static bool from_xml_val(tt_PTZPresetTourDirection& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -12657,36 +11406,12 @@ struct xml_convert::XmlValueAdapter<tt_PTZPresetTourDirection> {
     static bool to_xml_val(const tt_PTZPresetTourDirection& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_PTZPresetTourDirection
@@ -13150,7 +11875,7 @@ struct xml_convert::XmlValueAdapter<tt_MoveAndTrackMethod> {
     static bool from_xml_val(tt_MoveAndTrackMethod& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -13162,36 +11887,12 @@ struct xml_convert::XmlValueAdapter<tt_MoveAndTrackMethod> {
     static bool to_xml_val(const tt_MoveAndTrackMethod& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_MoveAndTrackMethod
@@ -13294,7 +11995,7 @@ struct xml_convert::XmlValueAdapter<tt_AFModes> {
     static bool from_xml_val(tt_AFModes& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -13306,36 +12007,12 @@ struct xml_convert::XmlValueAdapter<tt_AFModes> {
     static bool to_xml_val(const tt_AFModes& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_AFModes
@@ -13713,7 +12390,7 @@ struct xml_convert::XmlValueAdapter<tt_Enabled> {
     static bool from_xml_val(tt_Enabled& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -13725,36 +12402,12 @@ struct xml_convert::XmlValueAdapter<tt_Enabled> {
     static bool to_xml_val(const tt_Enabled& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_Enabled
@@ -13901,7 +12554,7 @@ struct xml_convert::XmlValueAdapter<tt_IrCutFilterAutoBoundaryType> {
     static bool from_xml_val(tt_IrCutFilterAutoBoundaryType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -13913,36 +12566,12 @@ struct xml_convert::XmlValueAdapter<tt_IrCutFilterAutoBoundaryType> {
     static bool to_xml_val(const tt_IrCutFilterAutoBoundaryType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_IrCutFilterAutoBoundaryType
@@ -13998,7 +12627,7 @@ struct xml_convert::XmlValueAdapter<tt_ToneCompensationMode> {
     static bool from_xml_val(tt_ToneCompensationMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -14010,36 +12639,12 @@ struct xml_convert::XmlValueAdapter<tt_ToneCompensationMode> {
     static bool to_xml_val(const tt_ToneCompensationMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ToneCompensationMode
@@ -14095,7 +12700,7 @@ struct xml_convert::XmlValueAdapter<tt_DefoggingMode> {
     static bool from_xml_val(tt_DefoggingMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -14107,36 +12712,12 @@ struct xml_convert::XmlValueAdapter<tt_DefoggingMode> {
     static bool to_xml_val(const tt_DefoggingMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_DefoggingMode
@@ -14738,7 +13319,7 @@ struct xml_convert::XmlValueAdapter<tt_ImageSendingType> {
     static bool from_xml_val(tt_ImageSendingType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -14750,36 +13331,12 @@ struct xml_convert::XmlValueAdapter<tt_ImageSendingType> {
     static bool to_xml_val(const tt_ImageSendingType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ImageSendingType
@@ -14835,7 +13392,7 @@ struct xml_convert::XmlValueAdapter<tt_PropertyOperation> {
     static bool from_xml_val(tt_PropertyOperation& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -14847,36 +13404,12 @@ struct xml_convert::XmlValueAdapter<tt_PropertyOperation> {
     static bool to_xml_val(const tt_PropertyOperation& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_PropertyOperation
@@ -15166,7 +13699,7 @@ struct xml_convert::XmlValueAdapter<tt_ExtendedDirection> {
     static bool from_xml_val(tt_ExtendedDirection& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -15178,36 +13711,12 @@ struct xml_convert::XmlValueAdapter<tt_ExtendedDirection> {
     static bool to_xml_val(const tt_ExtendedDirection& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ExtendedDirection
@@ -15689,7 +14198,7 @@ struct xml_convert::XmlValueAdapter<tt_ReceiverMode> {
     static bool from_xml_val(tt_ReceiverMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -15701,36 +14210,12 @@ struct xml_convert::XmlValueAdapter<tt_ReceiverMode> {
     static bool to_xml_val(const tt_ReceiverMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ReceiverMode
@@ -15846,7 +14331,7 @@ struct xml_convert::XmlValueAdapter<tt_ReceiverState> {
     static bool from_xml_val(tt_ReceiverState& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -15858,36 +14343,12 @@ struct xml_convert::XmlValueAdapter<tt_ReceiverState> {
     static bool to_xml_val(const tt_ReceiverState& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ReceiverState
@@ -16172,7 +14633,7 @@ struct xml_convert::XmlValueAdapter<tt_SearchState> {
     static bool from_xml_val(tt_SearchState& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -16184,36 +14645,12 @@ struct xml_convert::XmlValueAdapter<tt_SearchState> {
     static bool to_xml_val(const tt_SearchState& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_SearchState
@@ -16311,7 +14748,7 @@ struct xml_convert::XmlValueAdapter<tt_TrackType> {
     static bool from_xml_val(tt_TrackType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -16323,36 +14760,12 @@ struct xml_convert::XmlValueAdapter<tt_TrackType> {
     static bool to_xml_val(const tt_TrackType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_TrackType
@@ -16455,7 +14868,7 @@ struct xml_convert::XmlValueAdapter<tt_RecordingStatus> {
     static bool from_xml_val(tt_RecordingStatus& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -16467,36 +14880,12 @@ struct xml_convert::XmlValueAdapter<tt_RecordingStatus> {
     static bool to_xml_val(const tt_RecordingStatus& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_RecordingStatus
@@ -16778,7 +15167,7 @@ struct xml_convert::XmlValueAdapter<tt_TargetFormat> {
     static bool from_xml_val(tt_TargetFormat& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -16790,36 +15179,12 @@ struct xml_convert::XmlValueAdapter<tt_TargetFormat> {
     static bool to_xml_val(const tt_TargetFormat& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_TargetFormat
@@ -16872,7 +15237,7 @@ struct xml_convert::XmlValueAdapter<tt_EncryptionMode> {
     static bool from_xml_val(tt_EncryptionMode& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -16884,36 +15249,12 @@ struct xml_convert::XmlValueAdapter<tt_EncryptionMode> {
     static bool to_xml_val(const tt_EncryptionMode& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_EncryptionMode
@@ -18103,7 +16444,7 @@ struct xml_convert::XmlValueAdapter<tt_ModeOfOperation> {
     static bool from_xml_val(tt_ModeOfOperation& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -18115,36 +16456,12 @@ struct xml_convert::XmlValueAdapter<tt_ModeOfOperation> {
     static bool to_xml_val(const tt_ModeOfOperation& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_ModeOfOperation
@@ -18343,7 +16660,7 @@ struct xml_convert::XmlValueAdapter<tt_AudioClassType> {
     static bool from_xml_val(tt_AudioClassType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -18355,36 +16672,12 @@ struct xml_convert::XmlValueAdapter<tt_AudioClassType> {
     static bool to_xml_val(const tt_AudioClassType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_AudioClassType
@@ -18446,7 +16739,7 @@ struct xml_convert::XmlValueAdapter<tt_AudioClassification> {
     static bool from_xml_val(tt_AudioClassification& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -18458,36 +16751,12 @@ struct xml_convert::XmlValueAdapter<tt_AudioClassification> {
     static bool to_xml_val(const tt_AudioClassification& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_AudioClassification
@@ -18700,7 +16969,7 @@ struct xml_convert::XmlValueAdapter<tt_OSDType> {
     static bool from_xml_val(tt_OSDType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -18712,36 +16981,12 @@ struct xml_convert::XmlValueAdapter<tt_OSDType> {
     static bool to_xml_val(const tt_OSDType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tt_OSDType

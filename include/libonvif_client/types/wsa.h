@@ -197,7 +197,7 @@ struct xml_convert::XmlValueAdapter<wsa_RelationshipType> {
     static bool from_xml_val(wsa_RelationshipType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -209,36 +209,12 @@ struct xml_convert::XmlValueAdapter<wsa_RelationshipType> {
     static bool to_xml_val(const wsa_RelationshipType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum wsa_RelationshipType
@@ -359,7 +335,7 @@ struct xml_convert::XmlValueAdapter<wsa_FaultCodesType> {
     static bool from_xml_val(wsa_FaultCodesType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -371,36 +347,12 @@ struct xml_convert::XmlValueAdapter<wsa_FaultCodesType> {
     static bool to_xml_val(const wsa_FaultCodesType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum wsa_FaultCodesType

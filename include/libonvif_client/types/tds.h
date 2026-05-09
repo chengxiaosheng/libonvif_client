@@ -430,7 +430,7 @@ struct xml_convert::XmlValueAdapter<tds_AutoGeoModes> {
     static bool from_xml_val(tds_AutoGeoModes& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -442,36 +442,12 @@ struct xml_convert::XmlValueAdapter<tds_AutoGeoModes> {
     static bool to_xml_val(const tds_AutoGeoModes& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tds_AutoGeoModes
@@ -548,7 +524,7 @@ struct xml_convert::XmlValueAdapter<tds_HardwareTypes> {
     static bool from_xml_val(tds_HardwareTypes& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -560,36 +536,12 @@ struct xml_convert::XmlValueAdapter<tds_HardwareTypes> {
     static bool to_xml_val(const tds_HardwareTypes& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tds_HardwareTypes
@@ -3976,7 +3928,7 @@ struct xml_convert::XmlValueAdapter<tds_StorageType> {
     static bool from_xml_val(tds_StorageType& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         xmlNodePtr targetElement = name ? 
-            xmlGetChildElementByName(element, name) : element;
+            xml_convert::detail::xmlGetChildElementByName(element, name) : element;
         if (!targetElement) return false;
         xmlChar* content = xmlNodeGetContent(targetElement);
         if (!content) return false;
@@ -3988,36 +3940,12 @@ struct xml_convert::XmlValueAdapter<tds_StorageType> {
     static bool to_xml_val(const tds_StorageType& val, xmlNodePtr parent, const char* name,
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent || !name) return false;
-        xmlNodePtr element = create_element_with_ns(parent, name, ns_prefix, namespaces);
+        xmlNodePtr element = xml_convert::detail::create_element_with_ns(parent, name, ns_prefix, namespaces);
         if (!element) return false;
         xmlNodeSetContent(element, BAD_CAST to_string(val).c_str());
         return true;
     }
     
-private:
-    static xmlNodePtr create_element_with_ns(xmlNodePtr parent, const char* name, 
-                                            const char* ns_prefix, const std::map<std::string_view, std::string_view>& namespaces) {
-        xmlNodePtr element = xmlNewChild(parent, nullptr, BAD_CAST name, nullptr);
-        if (element && ns_prefix) {
-            auto it = namespaces.find(ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(element, BAD_CAST it->second.data(), BAD_CAST ns_prefix);
-                xmlSetNs(element, ns);
-            }
-        }
-        return element;
-    }
-    
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE && 
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
-    }
 };
 
 // XmlAttributeAdapter specialization for enum tds_StorageType

@@ -678,7 +678,7 @@ template<>
 struct XmlValueAdapter<AnyElement> {
     static bool from_xml_val(AnyElement& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
-        xmlNodePtr target_element = name ? xmlGetChildElementByName(element, name) : element;
+        xmlNodePtr target_element = name ? detail::xmlGetChildElementByName(element, name) : element;
         if (!target_element) return false;
 
         return parse_element_recursive(val, target_element, namespaces);
@@ -688,7 +688,6 @@ struct XmlValueAdapter<AnyElement> {
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent) return false;
 
-        // 如果指定了name参数，使用它；否则使用AnyElement的local_name
         const std::string element_name = name ? name : val.local_name;
         if (element_name.empty()) return false;
 
@@ -764,22 +763,23 @@ private:
         xmlNodePtr xml_element = xmlNewChild(parent, nullptr, BAD_CAST element_name.c_str(), nullptr);
         if (!xml_element) return false;
 
-        // 设置命名空间
-        if (!element.ns_prefix.empty() && !element.namespace_uri.empty()) {
-            xmlNsPtr ns = xmlNewNs(xml_element, BAD_CAST element.namespace_uri.c_str(),
-                                  BAD_CAST element.ns_prefix.c_str());
+        // 设置命名空间（优先复用祖先已有的声明，避免冗余 xmlns 输出）
+        if (!element.ns_prefix.empty()) {
+            xmlNsPtr ns = xmlSearchNs(xml_element->doc, xml_element, BAD_CAST element.ns_prefix.c_str());
+            if (!ns) {
+                // 祖先上没有，确定 URI 后在根节点创建
+                std::string ns_uri = element.namespace_uri;
+                if (ns_uri.empty()) {
+                    auto it = namespaces.find(element.ns_prefix);
+                    if (it != namespaces.end()) ns_uri = it->second;
+                }
+                if (!ns_uri.empty()) {
+                    ns = xmlNewNs(xmlDocGetRootElement(xml_element->doc),
+                                  BAD_CAST ns_uri.c_str(), BAD_CAST element.ns_prefix.c_str());
+                }
+            }
             if (ns) {
                 xmlSetNs(xml_element, ns);
-            }
-        } else if (!element.ns_prefix.empty()) {
-            // 尝试从命名空间映射中查找URI
-            auto it = namespaces.find(element.ns_prefix);
-            if (it != namespaces.end()) {
-                xmlNsPtr ns = xmlNewNs(xml_element, BAD_CAST it->second.data(),
-                                      BAD_CAST element.ns_prefix.c_str());
-                if (ns) {
-                    xmlSetNs(xml_element, ns);
-                }
             }
         }
 
@@ -802,20 +802,6 @@ private:
         }
 
         return true;
-    }
-
-    /**
-     * @brief 根据名称查找子元素
-     */
-    static xmlNodePtr xmlGetChildElementByName(xmlNodePtr parent, const char* name) {
-        if (!parent || !name) return nullptr;
-        for (xmlNodePtr child = parent->children; child; child = child->next) {
-            if (child->type == XML_ELEMENT_NODE &&
-                xmlStrcmp(child->name, BAD_CAST name) == 0) {
-                return child;
-            }
-        }
-        return nullptr;
     }
 };
 
@@ -935,8 +921,44 @@ public:
             return true;
         }
 
+        // 内容值处理（name == nullptr 表示元素文本内容）
+        if (!desc.name) {
+            return serialize_content_value(element, value);
+        }
+
         // 子元素处理
         return xml_convert::to_xml_val(value, element, desc.name, desc.ns_prefix, namespaces);
+    }
+
+    // 序列化内容值（name=nullptr 的字段，写入元素文本内容）
+    template<typename FieldType>
+    static bool serialize_content_value(xmlNodePtr element, const FieldType& value) {
+        if constexpr (traits::is_optional<FieldType>::value) {
+            if (!value.has_value()) return true;
+            return serialize_content_value(element, *value);
+        } else if constexpr (std::is_same_v<FieldType, std::string>) {
+            xmlNodeSetContent(element, BAD_CAST value.c_str());
+            return true;
+        } else if constexpr (std::is_same_v<FieldType, bool>) {
+            xmlNodeSetContent(element, BAD_CAST (value ? "true" : "false"));
+            return true;
+        } else if constexpr (std::is_arithmetic_v<FieldType>) {
+            if constexpr (std::is_floating_point_v<FieldType>) {
+                xmlNodeSetContent(element, BAD_CAST std::to_string(static_cast<double>(value)).c_str());
+            } else if constexpr (std::is_unsigned_v<FieldType>) {
+                xmlNodeSetContent(element, BAD_CAST std::to_string(static_cast<uint64_t>(value)).c_str());
+            } else {
+                xmlNodeSetContent(element, BAD_CAST std::to_string(static_cast<int64_t>(value)).c_str());
+            }
+            return true;
+        } else if constexpr (IsXmlSerializable<FieldType>) {
+            bool success = true;
+            std::apply([&](const auto&... fields) {
+                ((SerializeField(element, value, fields, {}) || [&]{ success = false; return false; }()), ...);
+            }, XmlTraits<FieldType>::fields);
+            return success;
+        }
+        return false;
     }
 
     // 字段级反序列化（改为 public 以便外部使用）
