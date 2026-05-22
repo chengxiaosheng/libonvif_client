@@ -32,7 +32,8 @@ const std::set<std::string> TypeUtils::BASIC_CPP_TYPES = {
     "std::string", "int32_t", "int64_t", "int16_t", "int8_t",
     "uint32_t", "uint64_t", "uint16_t", "uint8_t",
     "float", "double", "bool", "char", "int", "long",
-    "std::vector", "std::optional"
+    "std::vector", "std::optional",
+    "my_DateTime", "my_Date", "my_TimePart", "my_Duration"
 };
 
 // XSD到C++类型映射 - 统一定义
@@ -67,9 +68,9 @@ const std::map<std::string, std::string> TypeUtils::XSD_TO_CPP_TYPES = {
     {"xs:boolean", "bool"}, {"xsd:boolean", "bool"},
     
     // 日期时间类型
-    {"xs:dateTime", "std::string"}, {"xsd:dateTime", "std::string"},
-    {"xs:date", "std::string"}, {"xsd:date", "std::string"},
-    {"xs:time", "std::string"}, {"xsd:time", "std::string"},
+    {"xs:dateTime", "my_DateTime"}, {"xsd:dateTime", "my_DateTime"},
+    {"xs:date", "my_Date"}, {"xsd:date", "my_Date"},
+    {"xs:time", "my_TimePart"}, {"xsd:time", "my_TimePart"},
     
     // 二进制类型
     {"xs:base64Binary", "std::string"}, {"xsd:base64Binary", "std::string"},

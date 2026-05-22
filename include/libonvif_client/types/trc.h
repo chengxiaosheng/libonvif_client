@@ -862,9 +862,9 @@ struct xml_convert::XmlTraits<trc_GetRecordingOptionsResponse> {
 // 源文件: recording_v10.wsdl
 struct trc_ExportRecordedData {
     // Optional parameter that specifies start time for the exporting.
-    std::optional<std::string> StartPoint;
+    std::optional<my_DateTime> StartPoint;
     // Optional parameter that specifies end time for the exporting.
-    std::optional<std::string> EndPoint;
+    std::optional<my_DateTime> EndPoint;
     // Indicates the selection criterion on the existing recordings. .
     tt_SearchScope SearchScope;
     // Indicates which export file format to be used.

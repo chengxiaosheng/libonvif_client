@@ -209,9 +209,9 @@ struct xml_convert::XmlTraits<tev_PullMessages> {
 // 源文件: event_v10.wsdl
 struct tev_PullMessagesResponse {
     // The date and time when the messages have been delivered by the web server to the client.
-    std::string CurrentTime;
+    my_DateTime CurrentTime;
     // Date time when the PullPoint will be shut down without further pull requests.
-    std::string TerminationTime;
+    my_DateTime TerminationTime;
     // List of messages. This list shall be empty in case of a timeout.
     std::vector<wsnt_NotificationMessage> NotificationMessage;
 };
@@ -257,7 +257,7 @@ struct xml_convert::XmlTraits<tev_PullMessagesFaultResponse> {
 // 源文件: event_v10.wsdl
 struct tev_Seek {
     // The date and time to match against stored messages.
-    std::string UtcTime;
+    my_DateTime UtcTime;
     // Reverse the pull direction of PullMessages.
     std::optional<bool> Reverse;
     // Collection of any elements from namespace: ##other (processContents: strict)

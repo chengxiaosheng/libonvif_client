@@ -2538,7 +2538,7 @@ struct tr2_AddAudioClipResponse {
     // A URL to which the audio clip can be uploaded.
     std::string UploadUri;
     // Expiry time by which the client should upload the audio clip to the device.
-    std::string ExpiryTime;
+    my_DateTime ExpiryTime;
 };
 
 

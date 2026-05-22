@@ -10206,8 +10206,8 @@ struct xml_convert::XmlTraits<tt_CertificateUsage> {
 // 命名空间: http://www.onvif.org/ver10/schema
 // 源文件: onvif_v10.xsd
 struct tt_DateTimeRange {
-    std::string From;
-    std::string Until;
+    my_DateTime From;
+    my_DateTime Until;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     // Any attributes allowed (namespace: ##other, processContents: lax)
@@ -13460,7 +13460,7 @@ struct tt_Message {
     std::optional<tt_ItemList> Key;
     std::optional<tt_ItemList> Data;
     std::optional<tt_MessageExtension> Extension;
-    std::string UtcTime;
+    my_DateTime UtcTime;
     std::optional<tt_PropertyOperation> PropertyOperation;
     // Any attributes allowed (namespace: ##other, processContents: lax)
     std::optional<std::map<std::string, std::string>> _attrs_;
@@ -14449,9 +14449,9 @@ using tt_Description = std::string;
 // 源文件: onvif_v10.xsd
 struct tt_RecordingSummary {
     // The earliest point in time where there is recorded data on the device.
-    std::string DataFrom;
+    my_DateTime DataFrom;
     // The most recent point in time where there is recorded data on the device.
-    std::string DataUntil;
+    my_DateTime DataUntil;
     // The device contains this many recordings.
     int32_t NumberRecordings {};
     // Collection of any elements from namespace: ##any (processContents: lax)
@@ -14802,9 +14802,9 @@ struct tt_TrackInformation {
     // Informative description of the contents of the track.
     tt_Description Description;
     // The start date and time of the oldest recorded data in the track.
-    std::string DataFrom;
+    my_DateTime DataFrom;
     // The stop date and time of the newest recorded data in the track.
-    std::string DataTo;
+    my_DateTime DataTo;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     // Any attributes allowed (namespace: ##other, processContents: lax)
@@ -14920,8 +14920,8 @@ struct tt_RecordingInformation {
      * major data source for the recording. Currently the recordingconfiguration cannot describe each individual data source.
      */
     tt_RecordingSourceInformation Source;
-    std::optional<std::string> EarliestRecording;
-    std::optional<std::string> LatestRecording;
+    std::optional<my_DateTime> EarliestRecording;
+    std::optional<my_DateTime> LatestRecording;
     tt_Description Content;
     // Basic information about the track. Note that a track may represent a single contiguous time span or consist of multiple slices.
     std::vector<tt_TrackInformation> Track;
@@ -14980,7 +14980,7 @@ struct tt_FindEventResult {
     // A reference to the track where this event was found. Empty string if no track is associated with this event.
     tt_TrackReference TrackToken;
     // The time when the event occured.
-    std::string Time;
+    my_DateTime Time;
     // The description of the event.
     wsnt_NotificationMessageHolderType Event;
     // If true, indicates that the event is a virtual event generated for this particular search session to give the state of a property at the start time of the search.
@@ -15037,7 +15037,7 @@ struct tt_FindPTZPositionResult {
     // A reference to the metadata track containing the PTZ position.
     tt_TrackReference TrackToken;
     // The time when the PTZ position was valid.
-    std::string Time;
+    my_DateTime Time;
     // The PTZ position.
     tt_PTZVector Position;
     // Collection of any elements from namespace: ##any (processContents: lax)
@@ -15091,7 +15091,7 @@ struct tt_FindMetadataResult {
     // A reference to the metadata track containing the matching metadata.
     tt_TrackReference TrackToken;
     // The point in time when the matching metadata occurs in the metadata track.
-    std::string Time;
+    my_DateTime Time;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     // Any attributes allowed (namespace: ##other, processContents: lax)
@@ -15583,9 +15583,9 @@ struct tt_MediaAttributes {
     // A set of attributes for each track.
     std::vector<tt_TrackAttributes> TrackAttributes;
     // The attributes are valid from this point in time in the recording.
-    std::string From;
+    my_DateTime From;
     // The attributes are valid until this point in time in the recording. Can be equal to 'From' to indicate that the attributes are only known to be valid for this particular point in time.
-    std::string Until;
+    my_DateTime Until;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
     // Any attributes allowed (namespace: ##other, processContents: lax)

@@ -1278,7 +1278,7 @@ struct tt_Frame {
     std::optional<std::string> SceneImage;
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
-    std::string UtcTime;
+    my_DateTime UtcTime;
     // Default color space of Color definitions in frame. Valid values are "RGB" and "YCbCr". Defaults to "YCbCr".
     std::optional<std::string> Colorspace;
     // Optional name of the analytics module that generated this frame.
@@ -1312,7 +1312,7 @@ struct xml_convert::XmlTraits<tt_Frame> {
 // 命名空间: http://www.onvif.org/ver10/schema
 // 源文件: metadatastream_v10.xsd
 struct tt_ObjectState : public tt_Object {
-    std::string CaptureTime;
+    my_DateTime CaptureTime;
     // Any attributes allowed (namespace: ##other, processContents: lax)
     std::optional<std::map<std::string, std::string>> _attrs_;
 };
@@ -1402,7 +1402,7 @@ struct xml_convert::XmlTraits<tt_EventStream> {
 struct tt_AudioDescriptor {
     // Collection of any elements from namespace: ##any (processContents: lax)
     std::vector<AnyElement> _any_;
-    std::string UtcTime;
+    my_DateTime UtcTime;
     // Any attributes allowed (namespace: ##other, processContents: lax)
     std::optional<std::map<std::string, std::string>> _attrs_;
 };

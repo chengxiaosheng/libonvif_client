@@ -2806,9 +2806,9 @@ struct tds_CreateCertificate {
     // Identification of the entity associated with the public-key.
     std::optional<std::string> Subject;
     // Certificate validity start date.
-    std::optional<std::string> ValidNotBefore;
+    std::optional<my_DateTime> ValidNotBefore;
     // Certificate expiry start date.
-    std::optional<std::string> ValidNotAfter;
+    std::optional<my_DateTime> ValidNotAfter;
 };
 
 

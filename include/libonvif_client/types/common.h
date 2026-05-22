@@ -246,7 +246,7 @@ struct tt_PTZStatus {
     // States a current PTZ error.
     std::optional<std::string> Error;
     // Specifies the UTC time when this status was generated.
-    std::string UtcTime;
+    my_DateTime UtcTime;
     // States the current field of view of the video stream.
     std::optional<tt_FieldOfView> FieldOfView;
     // Collection of any elements from namespace: ##any (processContents: lax)

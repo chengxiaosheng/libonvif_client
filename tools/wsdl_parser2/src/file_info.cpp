@@ -35,7 +35,7 @@ namespace {
         static const std::set<std::string> cpp_system_types = {
             "std::string", "std::vector", "std::optional", "std::map", "std::set",
             "int32_t", "int64_t", "uint32_t", "uint64_t", "float", "double", "bool",
-            "AnyElement", "DateTime", "my_TimePart", "my_Base64Binary", "my_HexBinary"
+            "AnyElement", "my_DateTime", "my_Date", "my_TimePart", "my_Base64Binary", "my_HexBinary"
         };
         return cpp_system_types;
     }
@@ -110,8 +110,8 @@ std::string WsdlField::get_cpp_type() const {
         {"xs:boolean", "bool"}, {"xsd:boolean", "bool"},
         
         // 日期时间类型（使用libonvif_client的类型）
-        {"xs:dateTime", "DateTime"}, {"xsd:dateTime", "DateTime"},
-        {"xs:date", "DateTime"}, {"xsd:date", "DateTime"},
+        {"xs:dateTime", "my_DateTime"}, {"xsd:dateTime", "my_DateTime"},
+        {"xs:date", "my_Date"}, {"xsd:date", "my_Date"},
         {"xs:time", "my_TimePart"}, {"xsd:time", "my_TimePart"},
         
         // 二进制类型

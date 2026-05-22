@@ -1972,9 +1972,9 @@ void WsdlParser::resolve_field_namespace_and_type(WsdlField& field, std::shared_
     static const std::set<std::string> CPP_SYSTEM_TYPES = {
         "std::string", "std::vector", "std::optional", "std::map", "std::set",
         "int32_t", "int64_t", "uint32_t", "uint64_t", "float", "double", "bool",
-        "AnyElement", "DateTime", "my_TimePart", "my_Base64Binary", "my_HexBinary"
+        "AnyElement", "my_DateTime", "my_TimePart", "my_Base64Binary", "my_HexBinary"
     };
-    
+
     if (CPP_SYSTEM_TYPES.find(field.type) != CPP_SYSTEM_TYPES.end()) {
         return;
     }
@@ -2024,9 +2024,9 @@ std::string WsdlParser::resolve_type_reference(const std::string& type_ref, std:
     static const std::set<std::string> CPP_SYSTEM_TYPES = {
         "std::string", "std::vector", "std::optional", "std::map", "std::set",
         "int32_t", "int64_t", "uint32_t", "uint64_t", "float", "double", "bool",
-        "AnyElement", "DateTime", "my_TimePart", "my_Base64Binary", "my_HexBinary"
+        "AnyElement", "my_DateTime", "my_TimePart", "my_Base64Binary", "my_HexBinary"
     };
-    
+
     if (CPP_SYSTEM_TYPES.find(type_ref) != CPP_SYSTEM_TYPES.end()) {
         return type_ref; // C++系统类型不需要命名空间前缀
     }

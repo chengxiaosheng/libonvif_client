@@ -91,7 +91,7 @@ struct xml_convert::XmlTraits<wsrf_bf_FaultCause> {
 struct wsrf_bf_BaseFaultType {
     // Collection of any elements from namespace: ##other (processContents: lax)
     std::vector<AnyElement> _any_;
-    std::string Timestamp;
+    my_DateTime Timestamp;
     std::optional<wsa_EndpointReferenceType> Originator;
     std::optional<wsrf_bf_ErrorCode> ErrorCode;
     std::vector<wsrf_bf_Description> Description;

@@ -157,7 +157,7 @@ struct xml_convert::XmlTraits<tse_GetRecordingInformationResponse> {
 // 源文件: search_v10.wsdl
 struct tse_GetMediaAttributes {
     std::vector<tt_RecordingReference> RecordingTokens;
-    std::string Time;
+    my_DateTime Time;
 };
 
 
@@ -278,9 +278,9 @@ struct xml_convert::XmlTraits<tse_GetRecordingSearchResultsResponse> {
 // 源文件: search_v10.wsdl
 struct tse_FindEvents {
     // The point of time where the search will start.
-    std::string StartPoint;
+    my_DateTime StartPoint;
     // The point of time where the search will stop. This can be a time before the StartPoint, in which case the search is performed backwards in time.
-    std::optional<std::string> EndPoint;
+    std::optional<my_DateTime> EndPoint;
     tt_SearchScope Scope;
     tt_EventFilter SearchFilter;
     // Setting IncludeStartState to true means that the server should return virtual events representing the start state for any recording included in the scope. Start state events are limited to the topics defined in the SearchFilter that have the IsProperty flag set to true.
@@ -374,9 +374,9 @@ struct xml_convert::XmlTraits<tse_GetEventSearchResultsResponse> {
 // 源文件: search_v10.wsdl
 struct tse_FindPTZPosition {
     // The point of time where the search will start.
-    std::string StartPoint;
+    my_DateTime StartPoint;
     // The point of time where the search will stop. This can be a time before the StartPoint, in which case the search is performed backwards in time.
-    std::optional<std::string> EndPoint;
+    std::optional<my_DateTime> EndPoint;
     tt_SearchScope Scope;
     tt_PTZPositionFilter SearchFilter;
     // The search will be completed after this many matches. If not specified, the search will continue until reaching the endpoint or until the session expires.
@@ -467,9 +467,9 @@ struct xml_convert::XmlTraits<tse_GetPTZPositionSearchResultsResponse> {
 // 源文件: search_v10.wsdl
 struct tse_FindMetadata {
     // The point of time where the search will start.
-    std::string StartPoint;
+    my_DateTime StartPoint;
     // The point of time where the search will stop. This can be a time before the StartPoint, in which case the search is performed backwards in time.
-    std::optional<std::string> EndPoint;
+    std::optional<my_DateTime> EndPoint;
     tt_SearchScope Scope;
     tt_MetadataFilter MetadataFilter;
     // The search will be completed after this many matches. If not specified, the search will continue until reaching the endpoint or until the session expires.
@@ -613,7 +613,7 @@ struct xml_convert::XmlTraits<tse_EndSearch> {
 // 源文件: search_v10.wsdl
 struct tse_EndSearchResponse {
     // The point of time the search had reached when it was ended. It is equal to the EndPoint specified in Find-operation if the search was completed.
-    std::string Endpoint;
+    my_DateTime Endpoint;
 };
 
 

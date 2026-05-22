@@ -160,8 +160,8 @@ using wsnt_SubscriptionPolicy = wsnt_SubscriptionPolicyType;
 
 
 // CreationTime 类型别名
-// 基础类型: std::string
-using wsnt_CreationTime = std::string;
+// 基础类型: my_DateTime
+using wsnt_CreationTime = my_DateTime;
 
 
 // SubscriptionManagerRP 类型定义
@@ -285,13 +285,13 @@ struct xml_convert::XmlTraits<wsnt_AbsoluteOrRelativeTimeType> {
 
 
 // CurrentTime 类型别名
-// 基础类型: std::string
-using wsnt_CurrentTime = std::string;
+// 基础类型: my_DateTime
+using wsnt_CurrentTime = my_DateTime;
 
 
 // TerminationTime 类型别名
-// 基础类型: std::string
-using wsnt_TerminationTime = std::string;
+// 基础类型: my_DateTime
+using wsnt_TerminationTime = my_DateTime;
 
 
 // ProducerProperties 类型别名
@@ -646,8 +646,8 @@ using wsnt_NotifyMessageNotSupportedFault = wsnt_NotifyMessageNotSupportedFaultT
 // 命名空间: http://docs.oasis-open.org/wsn/b-2
 // 源文件: b-2.xsd
 struct wsnt_UnacceptableInitialTerminationTimeFaultType : public wsrf_bf_BaseFaultType {
-    std::string MinimumTime;
-    std::optional<std::string> MaximumTime;
+    my_DateTime MinimumTime;
+    std::optional<my_DateTime> MaximumTime;
 };
 
 
@@ -928,8 +928,8 @@ struct xml_convert::XmlTraits<wsnt_RenewResponse> {
 // 命名空间: http://docs.oasis-open.org/wsn/b-2
 // 源文件: b-2.xsd
 struct wsnt_UnacceptableTerminationTimeFaultType : public wsrf_bf_BaseFaultType {
-    std::string MinimumTime;
-    std::optional<std::string> MaximumTime;
+    my_DateTime MinimumTime;
+    std::optional<my_DateTime> MaximumTime;
 };
 
 

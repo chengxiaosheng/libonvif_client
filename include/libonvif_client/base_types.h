@@ -12,10 +12,10 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <cstdio>
 #include <ctime>
 #include <vector>
 
-#include "utils/date_time.h"
 #include "utils/logger.h"
 #include "xml_convert.h"
 
@@ -59,9 +59,130 @@ struct xml_convert::XmlValueAdapter<my_HexBinary> {
 
 // ==================== DateTime 类型 ====================
 
-/**
- * @brief 时间间隔类型，单位为秒
- */
+class my_DateTime {
+public:
+    my_DateTime() : micros_since_epoch_(
+        std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+        ).count()) {}
+
+    explicit my_DateTime(int64_t micros_since_epoch)
+        : micros_since_epoch_(micros_since_epoch) {}
+
+    static my_DateTime from_string(const std::string& date_time_str) {
+        std::string str = date_time_str;
+        size_t t_pos = str.find('T');
+        if (t_pos != std::string::npos) {
+            str[t_pos] = ' ';
+        }
+        int tz_offset_minutes = 0;
+        size_t z_pos = str.find('Z');
+        if (z_pos != std::string::npos) {
+            str = str.substr(0, z_pos);
+        } else {
+            size_t plus_pos = str.find('+', 10);
+            size_t minus_pos = str.find('-', 10);
+            size_t tz_pos = (plus_pos != std::string::npos) ? plus_pos : minus_pos;
+            if (tz_pos != std::string::npos) {
+                std::string tz_str = str.substr(tz_pos);
+                str = str.substr(0, tz_pos);
+                int tz_hours = 0, tz_mins = 0;
+                char sign = tz_str[0];
+                if (sscanf(tz_str.c_str() + 1, "%d:%d", &tz_hours, &tz_mins) >= 1) {
+                    tz_offset_minutes = tz_hours * 60 + tz_mins;
+                    if (sign == '-') {
+                        tz_offset_minutes = -tz_offset_minutes;
+                    }
+                }
+            }
+        }
+        std::tm tm = {};
+        int microseconds = 0;
+        size_t dot_pos = str.find('.');
+        if (dot_pos != std::string::npos) {
+            std::string micros_str = str.substr(dot_pos + 1);
+            str = str.substr(0, dot_pos);
+            while (micros_str.length() < 6) micros_str += "0";
+            if (micros_str.length() > 6) micros_str = micros_str.substr(0, 6);
+            microseconds = std::stoi(micros_str);
+        }
+        if (sscanf(str.c_str(), "%d-%d-%d %d:%d:%d",
+                   &tm.tm_year, &tm.tm_mon, &tm.tm_mday,
+                   &tm.tm_hour, &tm.tm_min, &tm.tm_sec) == 6 ||
+            sscanf(str.c_str(), "%d/%d/%d %d:%d:%d",
+                   &tm.tm_year, &tm.tm_mon, &tm.tm_mday,
+                   &tm.tm_hour, &tm.tm_min, &tm.tm_sec) == 6) {
+            tm.tm_year -= 1900;
+            tm.tm_mon -= 1;
+            tm.tm_isdst = -1;
+            std::time_t time = std::mktime(&tm);
+            time -= tz_offset_minutes * 60;
+            int64_t micros = static_cast<int64_t>(time) * 1000000LL + microseconds;
+            return my_DateTime(micros);
+        }
+        throw std::invalid_argument("Invalid date-time format: " + date_time_str);
+    }
+
+    [[nodiscard]] std::string to_string() const {
+        std::time_t seconds = micros_since_epoch_ / 1000000;
+        int64_t micros = micros_since_epoch_ % 1000000;
+        std::tm tm;
+#ifdef _WIN32
+        gmtime_s(&tm, &seconds);
+#else
+        gmtime_r(&seconds, &tm);
+#endif
+        std::ostringstream oss;
+        oss << std::setfill('0')
+            << std::setw(4) << (tm.tm_year + 1900) << "-"
+            << std::setw(2) << (tm.tm_mon + 1) << "-"
+            << std::setw(2) << tm.tm_mday << "T"
+            << std::setw(2) << tm.tm_hour << ":"
+            << std::setw(2) << tm.tm_min << ":"
+            << std::setw(2) << tm.tm_sec;
+        if (micros > 0) {
+            oss << "." << std::setw(6) << micros;
+        }
+        oss << "Z";
+        return oss.str();
+    }
+
+    [[nodiscard]] int64_t microSecondsSinceEpoch() const {
+        return micros_since_epoch_;
+    }
+
+    [[nodiscard]] int64_t secondsSinceEpoch() const {
+        return micros_since_epoch_ / 1000000;
+    }
+
+private:
+    int64_t micros_since_epoch_{};
+};
+
+template<>
+struct libonvif_client::xml_convert::XmlValueAdapter<my_DateTime> {
+    static bool from_xml_val(my_DateTime& val, xmlNodePtr element, const char* name = nullptr,
+                             const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
+        std::string str_val;
+        if (!xml_convert::from_xml_val(str_val, element, name, ns_prefix, namespaces)) {
+            return false;
+        }
+        try {
+            val = my_DateTime(my_DateTime::from_string(str_val).microSecondsSinceEpoch());
+            return true;
+        } catch (const std::exception& e) {
+            ONVIF_LOG_ERROR << "Failed to parse my_DateTime from XML: " << e.what();
+        }
+        return false;
+    }
+    static bool to_xml_val(const my_DateTime& val, xmlNodePtr parent, const char* name,
+                          const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
+        return xml_convert::to_xml_val(val.to_string(), parent, name, ns_prefix, namespaces);
+    }
+};
+
+// ==================== Duration 类型 ====================
+
 class my_Duration {
 public:
     my_Duration() = default;
@@ -108,6 +229,10 @@ public:
         //     throw std::invalid_argument("Invalid duration format");
 
         return my_Duration(negative ? -total : total);
+    }
+
+    my_Duration & operator=(std::chrono::seconds seconds) {
+        seconds_ = seconds;
     }
 
     [[nodiscard]] std::string to_string() const {
@@ -268,28 +393,65 @@ struct libonvif_client::xml_convert::XmlValueAdapter<my_TimePart> {
     }
 };
 
-// DateTime 已在 date_time.h 中定义，这里直接使用
-// 无需重新定义
+// ==================== Date 类型 ====================
+
+struct my_Date {
+    int year = 0;
+    int month = 1;
+    int day = 1;
+
+    static my_Date from_string(const std::string& dateStr) {
+        my_Date result;
+        std::string str = dateStr;
+
+        size_t z_pos = str.find('Z');
+        if (z_pos != std::string::npos) {
+            str = str.substr(0, z_pos);
+        } else {
+            size_t plus_pos = str.find('+', 5);
+            size_t minus_pos = str.rfind('-');
+            if (minus_pos > 5) {
+                str = str.substr(0, minus_pos);
+            } else if (plus_pos != std::string::npos) {
+                str = str.substr(0, plus_pos);
+            }
+        }
+
+        if (sscanf(str.c_str(), "%d-%d-%d", &result.year, &result.month, &result.day) >= 3) {
+            return result;
+        }
+        return my_Date{};
+    }
+
+    [[nodiscard]] std::string to_string() const {
+        std::ostringstream oss;
+        oss << std::setfill('0')
+            << std::setw(4) << year << "-"
+            << std::setw(2) << month << "-"
+            << std::setw(2) << day;
+        return oss.str();
+    }
+};
 
 template<>
-struct libonvif_client::xml_convert::XmlValueAdapter<DateTime> {
-    static bool from_xml_val(DateTime& val, xmlNodePtr element, const char* name = nullptr,
+struct libonvif_client::xml_convert::XmlValueAdapter<my_Date> {
+    static bool from_xml_val(my_Date& val, xmlNodePtr element, const char* name = nullptr,
                              const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         std::string str_val;
         if (!xml_convert::from_xml_val(str_val, element, name, ns_prefix, namespaces)) {
             return false;
         }
         try {
-            val = DateTime(DateTime::fromString(str_val).microSecondsSinceEpoch());
+            val = my_Date::from_string(str_val);
             return true;
         } catch (const std::exception& e) {
-            ONVIF_LOG_ERROR << "Failed to parse DateTime from XML: " << e.what();
+            ONVIF_LOG_ERROR << "Failed to parse my_Date from XML: " << e.what();
         }
         return false;
     }
-    static bool to_xml_val(const DateTime& val, xmlNodePtr parent, const char* name,
+    static bool to_xml_val(const my_Date& val, xmlNodePtr parent, const char* name,
                           const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
-        return xml_convert::to_xml_val(val.toIOS8601String(), parent, name, ns_prefix, namespaces);
+        return xml_convert::to_xml_val(val.to_string(), parent, name, ns_prefix, namespaces);
     }
 };
 
