@@ -12,10 +12,14 @@ if(CURL_FOUND OR TARGET CURL::libcurl)
     )
 
     # 包含目录
-    target_include_directories(onvif_client_curl_demo PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(onvif_client_curl_demo PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_SOURCE_DIR}/..
+    )
 
     # 链接库
     target_link_libraries(onvif_client_curl_demo PRIVATE
+            onvif_demo_common
             onvif_client
             CURL::libcurl
     )

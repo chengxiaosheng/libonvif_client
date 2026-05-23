@@ -179,6 +179,13 @@ public:
         return "";
     }
 
+    const std::string &username() const {
+        return username_;
+    }
+    const std::string &password() const {
+        return password_;
+    }
+
 private:
     std::shared_ptr<IHttpClient> http_client_;      ///< HTTP客户端
     std::string device_url_;                        ///< 设备URL

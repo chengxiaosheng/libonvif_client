@@ -114,8 +114,12 @@ public:
                    &tm.tm_hour, &tm.tm_min, &tm.tm_sec) == 6) {
             tm.tm_year -= 1900;
             tm.tm_mon -= 1;
-            tm.tm_isdst = -1;
-            std::time_t time = std::mktime(&tm);
+            tm.tm_isdst = 0;
+#ifdef _WIN32
+            std::time_t time = _mkgmtime(&tm);
+#else
+            std::time_t time = timegm(&tm);
+#endif
             time -= tz_offset_minutes * 60;
             int64_t micros = static_cast<int64_t>(time) * 1000000LL + microseconds;
             return my_DateTime(micros);
@@ -140,9 +144,9 @@ public:
             << std::setw(2) << tm.tm_hour << ":"
             << std::setw(2) << tm.tm_min << ":"
             << std::setw(2) << tm.tm_sec;
-        if (micros > 0) {
-            oss << "." << std::setw(6) << micros;
-        }
+        // if (micros > 0) {
+        //     oss << "." << std::setw(6) << micros;
+        // }
         oss << "Z";
         return oss.str();
     }
@@ -153,6 +157,9 @@ public:
 
     [[nodiscard]] int64_t secondsSinceEpoch() const {
         return micros_since_epoch_ / 1000000;
+    }
+    my_DateTime after(std::chrono::seconds seconds) const {
+        return my_DateTime(micros_since_epoch_ + seconds.count() * 1000000);
     }
 
 private:
@@ -233,6 +240,7 @@ public:
 
     my_Duration & operator=(std::chrono::seconds seconds) {
         seconds_ = seconds;
+        return *this;
     }
 
     [[nodiscard]] std::string to_string() const {

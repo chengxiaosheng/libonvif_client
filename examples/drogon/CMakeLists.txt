@@ -8,15 +8,19 @@ find_package(drogon QUIET)
 # 只有找到 drogon 时才构建示例
 if(drogon_FOUND OR TARGET drogon)
     add_executable(onvif_client_demo
-            demo.cpp
+            drogon_demo.cpp
             drogon_http_client.cpp
     )
 
     # 包含目录
-    target_include_directories(onvif_client_demo PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(onvif_client_demo PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_SOURCE_DIR}/..
+    )
 
     # 链接库
     target_link_libraries(onvif_client_demo PRIVATE
+            onvif_demo_common
             onvif_client
             drogon
     )

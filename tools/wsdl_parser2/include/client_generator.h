@@ -100,9 +100,12 @@ private:
     /**
      * @brief 映射消息类型到C++类型
      * @param message_name 消息名称
+     * @param service_namespaces 服务的命名空间映射（用于前缀解析）
      * @return C++类型名
      */
-    std::string map_message_to_cpp_type(const std::string& message_name) const;
+    std::string map_message_to_cpp_type(
+        const std::string& message_name,
+        const std::map<std::string, std::string>& service_namespaces) const;
 
     /**
      * @brief 生成服务自动注册代码

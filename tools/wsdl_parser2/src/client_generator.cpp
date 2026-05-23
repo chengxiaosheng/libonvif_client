@@ -278,9 +278,9 @@ std::string ClientGenerator::generate_client_source(const WsdlService& service,
 
 std::string ClientGenerator::generate_operation_declaration(const WsdlOperation& operation) const {
     std::ostringstream oss;
-    
-    std::string input_type = map_message_to_cpp_type(operation.input_type);
-    std::string output_type = map_message_to_cpp_type(operation.output_type);
+
+    std::string input_type = map_message_to_cpp_type(operation.input_type, {});
+    std::string output_type = map_message_to_cpp_type(operation.output_type, {});
     
     oss << "    /**\n";
     oss << "     * @brief " << operation.name << " operation\n";
@@ -309,8 +309,8 @@ std::string ClientGenerator::generate_operation_implementation(
     std::ostringstream oss;
     
     std::string class_name = get_client_class_name(service);
-    std::string input_type = map_message_to_cpp_type(operation.input_type);
-    std::string output_type = map_message_to_cpp_type(operation.output_type);
+    std::string input_type = map_message_to_cpp_type(operation.input_type, service.namespaces);
+    std::string output_type = map_message_to_cpp_type(operation.output_type, service.namespaces);
     
     // 构造SOAP Action
     std::string soap_action = operation.soap_action;
@@ -365,8 +365,8 @@ std::string ClientGenerator::generate_operation_inline_implementation(
 
     std::ostringstream oss;
 
-    std::string input_type = map_message_to_cpp_type(operation.input_type);
-    std::string output_type = map_message_to_cpp_type(operation.output_type);
+    std::string input_type = map_message_to_cpp_type(operation.input_type, service.namespaces);
+    std::string output_type = map_message_to_cpp_type(operation.output_type, service.namespaces);
 
     // 构造SOAP Action
     std::string soap_action = operation.soap_action;
@@ -466,17 +466,36 @@ std::string ClientGenerator::get_client_class_name(const WsdlService& service) c
     return class_name;
 }
 
-std::string ClientGenerator::map_message_to_cpp_type(const std::string& element_name) const {
+std::string ClientGenerator::map_message_to_cpp_type(
+    const std::string& element_name,
+    const std::map<std::string, std::string>& service_namespaces) const {
     if (element_name.empty()) {
         return "void";
     }
 
     std::string type_name = element_name;
 
-    // 将命名空间前缀的冒号替换为下划线 (例如: tds:GetServices -> tds_GetServices)
+    // 解析 WSDL 前缀并替换为 config 中配置的前缀
     size_t colon_pos = type_name.find(':');
     if (colon_pos != std::string::npos) {
-        type_name[colon_pos] = '_';
+        std::string wsdl_prefix = type_name.substr(0, colon_pos);
+        std::string local_name = type_name.substr(colon_pos + 1);
+
+        // 通过 service 的命名空间映射找到 URI
+        auto ns_it = service_namespaces.find(wsdl_prefix);
+        if (ns_it != service_namespaces.end()) {
+            const std::string& uri = ns_it->second;
+            // 在 config 的 schema_configs 中查找对应的 ns_prefix
+            for (const auto& schema_config : config_.schema_configs) {
+                if (schema_config.ns_url == uri) {
+                    type_name = schema_config.ns_prefix + "_" + local_name;
+                    break;
+                }
+            }
+        } else {
+            // 回退: 直接将冒号替换为下划线
+            type_name[colon_pos] = '_';
+        }
     }
 
     // 确保类型名符合C++命名规范
@@ -486,7 +505,14 @@ std::string ClientGenerator::map_message_to_cpp_type(const std::string& element_
 }
 
 std::string ClientGenerator::extract_namespace_prefix(const WsdlService& service) const {
-    // 在 namespaces 映射中查找与 target_namespace 匹配的前缀
+    // 优先从 config 的 schema_configs 中查找匹配的 ns_prefix
+    for (const auto& schema_config : config_.schema_configs) {
+        if (schema_config.ns_url == service.target_namespace) {
+            return schema_config.ns_prefix;
+        }
+    }
+
+    // 回退: 在 WSDL 的 namespaces 映射中查找与 target_namespace 匹配的前缀
     for (const auto& [prefix, uri] : service.namespaces) {
         if (uri == service.target_namespace) {
             return prefix;

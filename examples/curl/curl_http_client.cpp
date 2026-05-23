@@ -103,9 +103,7 @@ void CurlHttpClient::set_connect_timeout(long timeout_secs) {
 // ============================================================================
 void CurlHttpClient::request_async(Request request, Callback callback) {
     // 在后台线程中执行请求（模拟异步）
-    std::thread([this, request = std::move(request), callback = std::move(callback)]() {
-        perform_request(request, callback);
-    }).detach();
+    perform_request(request, callback);
 }
 
 // ============================================================================

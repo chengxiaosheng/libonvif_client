@@ -101,7 +101,6 @@ namespace libonvif_client {
         [[nodiscard]] virtual const char * get_namespace_uri() const = 0;
         [[nodiscard]] virtual const char * get_namespace_prefix() const = 0;
 
-    protected:
         /**
          * @brief 核心服务调用方法
          *

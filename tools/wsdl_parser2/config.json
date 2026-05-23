@@ -178,8 +178,8 @@
     },
     {
       "ns_url": "http://www.onvif.org/ver10/receiver/wsdl",
-      "ns_prefix": "tvr",
-      "output_name": "tvr",
+      "ns_prefix": "trv",
+      "output_name": "trv",
       "source_files": ["receiver_v10.wsdl"],
       "priority": 6
     },

@@ -24,7 +24,7 @@ struct namespace_pair {
 /**
  * @brief 所有命名空间映射
  */
-inline constexpr std::array<namespace_pair, 25> g_namespace_mappings = {{
+inline constexpr std::array<namespace_pair, 26> g_namespace_mappings = {{
     namespace_pair{"bd", "http://www.onvif.org/ver20/analytics/humanbody"},
     namespace_pair{"fc", "http://www.onvif.org/ver20/analytics/humanface"},
     namespace_pair{"soap", "http://www.w3.org/2003/05/soap-envelope"},
@@ -38,6 +38,7 @@ inline constexpr std::array<namespace_pair, 25> g_namespace_mappings = {{
     namespace_pair{"trc", "http://www.onvif.org/ver10/recording/wsdl"},
     namespace_pair{"trp", "http://www.onvif.org/ver10/replay/wsdl"},
     namespace_pair{"trt", "http://www.onvif.org/ver10/media/wsdl"},
+    namespace_pair{"trv", "http://www.onvif.org/ver10/receiver/wsdl"},
     namespace_pair{"tse", "http://www.onvif.org/ver10/search/wsdl"},
     namespace_pair{"tt", "http://www.onvif.org/ver10/schema"},
     namespace_pair{"wsa", "http://www.w3.org/2005/08/addressing"},

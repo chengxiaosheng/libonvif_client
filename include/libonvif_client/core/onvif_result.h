@@ -109,6 +109,20 @@ struct SoapFault {
         msg += "] ";
         msg += reason;
 
+        if (detail_node) {
+            xmlChar* content = xmlNodeGetContent(detail_node);
+            if (content) {
+                std::string_view sv(reinterpret_cast<const char*>(content));
+                auto start = sv.find_first_not_of(" \t\n\r");
+                if (start != std::string_view::npos) {
+                    auto end = sv.find_last_not_of(" \t\n\r");
+                    msg += " Detail: ";
+                    msg += sv.substr(start, end - start + 1);
+                }
+                xmlFree(content);
+            }
+        }
+
         return msg;
     }
 };

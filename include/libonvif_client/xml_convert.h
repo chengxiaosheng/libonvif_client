@@ -6,16 +6,18 @@
 
 #pragma once
 
-#include <libxml/parser.h>
-#include <libxml/tree.h>
 #include <map>
 #include <optional>
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <cstdint>
 #include <tuple>
 #include <type_traits>
 #include <vector>
+#include <memory>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 
 namespace libonvif_client {
 
@@ -688,6 +690,11 @@ struct XmlValueAdapter<AnyElement> {
                            const char* ns_prefix = nullptr, const std::map<std::string_view, std::string_view>& namespaces = {}) {
         if (!parent) return false;
 
+        if (!val.text_content.empty()) {
+            xmlNodeSetContent(parent, BAD_CAST val.text_content.c_str());
+            return true;
+        }
+
         const std::string element_name = name ? name : val.local_name;
         if (element_name.empty()) return false;
 
@@ -1036,6 +1043,19 @@ public:
         if ((desc.type & serialize_type::any_element) == serialize_type::any_element) {
             if (has_any_field && desc.name && std::string(desc.name) == "_any_") {
                 collect_unprocessed_elements(value, element, processed_names, namespaces);
+                // mixed="true" 类型（如 TopicExpressionType）可能没有子元素，只有直接文本内容
+                // 若 collect_unprocessed_elements 未写入数据，则收集文本内容到 AnyElement.text_content
+                if constexpr (std::is_same_v<FieldType, std::optional<AnyElement>> || std::is_same_v<FieldType, AnyElement>) {
+                    std::string text;
+                    if (element->children && (element->children->type == XML_TEXT_NODE || element->children->type == XML_CDATA_SECTION_NODE) && element->children->content) {
+                        text += reinterpret_cast<const char*>(element->children->content);
+                    }
+                    if (!text.empty()) {
+                        AnyElement any_elem;
+                        any_elem.text_content = std::move(text);
+                        value = std::move(any_elem);
+                    }
+                }
             }
             // 非标准的 xs:any 字段（不是 _any）被忽略
             return true;
